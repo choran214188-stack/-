@@ -10,6 +10,7 @@ type Props = {
   messages: ChatMessage[];
   typing: boolean;
   personaName: string;
+  personaImage?: string;
 };
 
 function shouldShowTime(messages: ChatMessage[], index: number): boolean {
@@ -25,7 +26,7 @@ function formatMinute(iso: string): string {
   return `${d.getHours()}:${d.getMinutes()}`;
 }
 
-export function ChatMessageList({ messages, typing, personaName }: Props) {
+export function ChatMessageList({ messages, typing, personaName, personaImage }: Props) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,16 +40,28 @@ export function ChatMessageList({ messages, typing, personaName }: Props) {
       aria-label="대화 내용"
       aria-live="polite"
     >
-      <div className="flex min-h-full flex-col gap-2.5">
+      <div className="flex min-h-full flex-col gap-1.5">
         {messages.length > 0 ? <ChatDateDivider createdAt={messages[0].createdAt} /> : null}
-        {messages.map((message, index) => (
-          <ChatBubble
-            key={message.id}
-            message={message}
-            showTime={shouldShowTime(messages, index)}
-          />
-        ))}
-        {typing ? <TypingIndicator name={personaName} /> : null}
+        {messages.map((message, index) => {
+          const prev = messages[index - 1];
+          const firstOfGroup = !prev || prev.role !== message.role;
+          return (
+            <div key={message.id} className={firstOfGroup && index > 0 ? "mt-1.5" : undefined}>
+              <ChatBubble
+                message={message}
+                showTime={shouldShowTime(messages, index)}
+                personaName={personaName}
+                personaImage={personaImage}
+                showAvatar={message.role === "assistant" && firstOfGroup}
+              />
+            </div>
+          );
+        })}
+        {typing ? (
+          <div className="mt-1.5 pl-[42px]">
+            <TypingIndicator name={personaName} showLabel={false} />
+          </div>
+        ) : null}
         <div ref={endRef} />
       </div>
     </div>

@@ -2,7 +2,7 @@ import type { WarningItem } from "@/types/evaluation";
 
 export function WarningCard({ warnings }: { warnings: WarningItem[] }) {
   return (
-    <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+    <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
       <h3 className="text-[15px] font-bold text-navy">주의가 필요한 발언</h3>
       {warnings.length === 0 ? (
         <p className="mt-3 text-[13px] text-navy-muted">
@@ -11,7 +11,7 @@ export function WarningCard({ warnings }: { warnings: WarningItem[] }) {
       ) : (
         <ul className="mt-3 space-y-3">
           {warnings.map((w, i) => (
-            <li key={`${w.turn}-${i}`} className="rounded-xl border border-line p-4">
+            <li key={`${w.turn}-${i}`} className="rounded-xl border border-hair p-4">
               <p className="text-[13px] font-semibold text-navy">{w.type}</p>
               <p className="mt-1.5 text-[12.5px] leading-relaxed text-navy-soft">{w.reason}</p>
               <div className="mt-2 rounded-lg border-l-2 border-[#B08585] bg-[#FBF6F4] px-3 py-2">

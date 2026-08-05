@@ -20,7 +20,7 @@ export function AxisCard({ axis, index }: { axis: AxisReview; index: number }) {
   const [open, setOpen] = useState(index === 0);
 
   return (
-    <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+    <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-[15px] font-bold text-navy">{axis.title}</h3>
@@ -51,7 +51,7 @@ export function AxisCard({ axis, index }: { axis: AxisReview; index: number }) {
         <>
           <ul className="mt-2">
             {axis.criteria.map((c) => (
-              <li key={c.id} className="border-t border-line py-3.5 first:border-t-0">
+              <li key={c.id} className="border-t border-hair py-3.5 first:border-t-0">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="text-[13px] font-semibold text-navy">
                     <span
@@ -82,7 +82,7 @@ export function AxisCard({ axis, index }: { axis: AxisReview; index: number }) {
             ))}
           </ul>
           {axis.betterResponseExample ? (
-            <div className="mt-3 rounded-xl bg-ivory p-4">
+            <div className="mt-3 rounded-xl bg-frost p-4">
               <p className="text-[11.5px] font-semibold text-navy-muted">이렇게 말할 수 있었습니다</p>
               <p className="mt-1.5 break-anywhere text-[13px] leading-relaxed text-navy">
                 “{axis.betterResponseExample}”
