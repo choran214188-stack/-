@@ -44,15 +44,22 @@ export async function POST(request: Request) {
       try {
         const text = await provider.complete({
           system:
-            "당신은 기업 리더십 교육 시뮬레이션의 팀장 역할이다. 부서장과의 면담을 시작하는 첫 메시지를 작성한다.",
+            "당신은 기업 리더십 교육 시뮬레이션의 팀장 역할이다. 상사인 부서장과의 면담을 시작하며 팀장이 먼저 꺼내는 첫 메시지를 작성한다.",
           messages: [
             {
               role: "user",
-              content: `상황: ${scenario.situation}
-팀장: ${persona.name} (${persona.tagline || persona.subtitle})
-성향: ${persona.personality.join(" / ")}
+              content: `[상황]
+${scenario.situation}
 
-이 팀장이 면담을 시작하며 먼저 꺼낼 말을 2문장으로 작성하라. 각 문장을 줄바꿈으로 구분하고, 설명이나 따옴표 없이 대사만 출력하라. 이모지와 목록을 쓰지 않는다.`,
+[팀장]
+이름: ${persona.name}${persona.subtitle ? ` (${persona.subtitle})` : ""}
+성격: ${persona.personality.join(" / ")}
+
+위 상황을 실제로 겪고 있는 팀장이, 이 성격 그대로 면담을 시작하며 먼저 꺼낼 말을 2문장으로 작성하라.
+- 상황의 구체적인 사실을 자연스럽게 드러낼 것 (막연하게 시작하지 말 것)
+- 성격이 말투에 드러나게 할 것
+- 회사 메신저에서 쓸 법한 자연스러운 존댓말
+- 각 문장을 줄바꿈으로 구분하고, 설명·따옴표·이모지·목록 없이 대사만 출력`,
             },
           ],
           maxTokens: 300,
