@@ -28,7 +28,13 @@ const deriveTitle = (situation: string) => {
 };
 
 const field =
-  "mt-1.5 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-navy outline-none placeholder:text-navy-muted/60 focus:border-gold";
+  "mt-2 w-full rounded-xl border border-line bg-white/80 px-4 py-3 text-[14px] leading-relaxed text-navy outline-none transition placeholder:text-navy-muted/50 focus:border-gold focus:bg-white focus:ring-4 focus:ring-gold/10";
+
+const labelClass =
+  "flex items-baseline gap-2 text-[12.5px] font-semibold tracking-tight text-navy";
+
+const numeral =
+  "font-serif-display text-[15px] font-medium leading-none text-gold";
 
 export default function StartPage() {
   const router = useRouter();
@@ -95,91 +101,128 @@ export default function StartPage() {
   };
 
   return (
-    <main className="relative min-h-[100dvh] bg-ivory px-5 py-10 sm:px-8 sm:py-16">
-      <div className="mx-auto w-full max-w-[560px]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-gold">
-          Leadership Practice
-        </p>
-        <h1 className="mt-3 text-[26px] font-bold leading-tight text-navy sm:text-[34px]">
-          팀장 임파워먼트 대화 시뮬레이션
-        </h1>
-        <p className="mt-4 text-[13.5px] leading-relaxed text-navy-soft">
-          팀장의 이름과 성격, 지금 처한 상황만 적으면 그 설정에 맞춰 AI 팀장과 메신저처럼 대화합니다.
-          대화가 끝나면 임파워먼트 네 가지 축을 얼마나 다뤘는지 점검합니다.
-        </p>
+    <main className="relative min-h-[100dvh] overflow-hidden bg-[radial-gradient(120%_90%_at_50%_-10%,#FFFFFF_0%,#FBF8F1_42%,#F3EFE5_100%)] px-5 py-14 sm:px-8 sm:py-20">
+      {/* 은은한 골드 후광 */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl"
+      />
 
-        <section className="mt-8 rounded-2xl border border-line bg-white p-5 sm:p-6">
-          <div>
-            <label className="text-[12px] font-semibold text-navy-muted" htmlFor="c-name">
-              이름 *
-            </label>
-            <input
-              id="c-name"
-              className={field}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="예) 김도현"
-            />
+      <div className="relative mx-auto w-full max-w-[600px]">
+        {/* 헤더 */}
+        <header className="animate-rise text-center" style={{ animationDelay: "40ms" }}>
+          <div className="mx-auto flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-gold/60" />
+            <p className="font-serif-display text-[13px] italic tracking-[0.25em] text-gold">
+              Leadership Practice
+            </p>
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-gold/60" />
           </div>
 
-          <div className="mt-5">
-            <label className="text-[12px] font-semibold text-navy-muted" htmlFor="c-personality">
-              성격 * (한 줄에 하나씩 적어도 됩니다)
-            </label>
-            <textarea
-              id="c-personality"
-              rows={4}
-              className={field}
-              value={personality}
-              onChange={(e) => setPersonality(e.target.value)}
-              placeholder={"예) 책임감이 강하고 결과로 자신을 판단한다\n약점을 드러내는 것을 불편해한다\n막연한 격려에는 근거를 되묻는다"}
-            />
-          </div>
+          <h1 className="mt-5 break-keep text-[28px] font-bold leading-[1.25] tracking-[-0.01em] text-navy sm:text-[36px]">
+            팀장 임파워먼트 대화 시뮬레이션
+          </h1>
 
-          <div className="mt-5">
-            <label className="text-[12px] font-semibold text-navy-muted" htmlFor="c-situation">
-              상황 * (지금 팀장이 처한 상황을 구체적으로)
-            </label>
-            <textarea
-              id="c-situation"
-              rows={5}
-              className={field}
-              value={situation}
-              onChange={(e) => setSituation(e.target.value)}
-              placeholder="언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
-            />
+          <p className="mx-auto mt-5 max-w-[420px] break-keep text-[13.5px] leading-relaxed text-navy-soft">
+            팀장의 이름과 성격, 지금 처한 상황을 적으면 그 설정에 맞춰 AI 팀장과 실제처럼 대화합니다.
+            대화가 끝나면 임파워먼트 네 가지 축을 얼마나 다뤘는지 점검해 드립니다.
+          </p>
+        </header>
+
+        {/* 입력 카드 */}
+        <section
+          className="animate-rise mt-11 overflow-hidden rounded-[26px] border border-line/70 bg-white/70 shadow-[0_28px_70px_-40px_rgba(22,35,60,0.45)] backdrop-blur-sm"
+          style={{ animationDelay: "140ms" }}
+        >
+          <div className="h-[3px] w-full bg-gradient-to-r from-gold-soft via-gold to-gold-soft" />
+
+          <div className="space-y-7 p-6 sm:p-8">
+            <div>
+              <label className={labelClass} htmlFor="c-name">
+                <span className={numeral}>01</span>
+                이름
+              </label>
+              <input
+                id="c-name"
+                className={field}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="예) 김도현"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="c-personality">
+                <span className={numeral}>02</span>
+                성격
+                <span className="text-[11.5px] font-normal text-navy-muted/70">
+                  한 줄에 하나씩
+                </span>
+              </label>
+              <textarea
+                id="c-personality"
+                rows={4}
+                className={field}
+                value={personality}
+                onChange={(e) => setPersonality(e.target.value)}
+                placeholder={"예) 책임감이 강하고 결과로 자신을 판단한다\n약점을 드러내는 것을 불편해한다\n막연한 격려에는 근거를 되묻는다"}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="c-situation">
+                <span className={numeral}>03</span>
+                상황
+                <span className="text-[11.5px] font-normal text-navy-muted/70">
+                  구체적으로
+                </span>
+              </label>
+              <textarea
+                id="c-situation"
+                rows={5}
+                className={field}
+                value={situation}
+                onChange={(e) => setSituation(e.target.value)}
+                placeholder="언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
+              />
+            </div>
+
+            {error ? (
+              <p className="rounded-xl border border-[#E1CBCB] bg-[#FBF1F1] px-4 py-3 text-[12.5px] text-[#84343A]">
+                {error}
+              </p>
+            ) : null}
+
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row">
+              <button
+                type="button"
+                onClick={hasSaved ? () => setConfirmNew(true) : start}
+                className="group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy px-7 py-4 text-[14px] font-semibold tracking-tight text-white shadow-[0_16px_34px_-16px_rgba(22,35,60,0.75)] transition hover:bg-navy-soft"
+              >
+                대화 시작하기
+                <span className="text-gold-soft transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
+              </button>
+              {hasSaved ? (
+                <button
+                  type="button"
+                  onClick={() => router.push("/simulation")}
+                  className="rounded-2xl border border-navy/15 bg-white/60 px-7 py-4 text-[14px] font-semibold text-navy transition hover:border-gold/50 hover:bg-white"
+                >
+                  이어서 진행
+                </button>
+              ) : null}
+            </div>
           </div>
         </section>
 
-        {error ? (
-          <p className="mt-4 rounded-xl border border-[#D9C3C3] bg-[#FBEFEF] px-4 py-3 text-[12.5px] text-[#7A2E2E]">
-            {error}
-          </p>
-        ) : null}
-
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={hasSaved ? () => setConfirmNew(true) : start}
-            className="rounded-xl bg-navy px-7 py-3.5 text-[14px] font-semibold text-white hover:bg-navy-soft"
-          >
-            대화 시작하기
-          </button>
-          {hasSaved ? (
-            <button
-              type="button"
-              onClick={() => router.push("/simulation")}
-              className="rounded-xl border border-navy/20 px-7 py-3.5 text-[14px] font-semibold text-navy hover:bg-white"
-            >
-              진행 중이던 대화 이어서 진행
-            </button>
-          ) : null}
-        </div>
-
-        <p className="mt-8 border-t border-line pt-5 text-[11.5px] leading-relaxed text-navy-muted">
+        <p
+          className="animate-rise mx-auto mt-8 max-w-[440px] text-center text-[11.5px] leading-relaxed text-navy-muted"
+          style={{ animationDelay: "240ms" }}
+        >
           입력한 내용은 이 브라우저에만 저장되며 서버에 보관되지 않습니다. 실제 구성원의 이름이나
-          개인 정보는 넣지 마십시오. 이 점검은 인사평가나 심리 진단이 아니라 리더십 교육을 위한
-          대화 점검 도구입니다.
+          개인 정보는 넣지 마십시오. 인사평가나 심리 진단이 아닌 리더십 교육용 대화 점검 도구입니다.
         </p>
       </div>
 
