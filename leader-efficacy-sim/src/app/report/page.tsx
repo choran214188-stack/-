@@ -1,0 +1,223 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AxisCard } from "@/components/report/AxisCard";
+import { WarningCard } from "@/components/report/WarningCard";
+import { TranscriptView } from "@/components/report/TranscriptView";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { clearSession, loadCustom, loadSession } from "@/lib/storage/session-storage";
+import { getPersona } from "@/config/personas";
+import { getScenario } from "@/config/scenarios";
+import { CUSTOM_PERSONA_ID, CUSTOM_SCENARIO_ID, toPersona, toScenario } from "@/lib/custom";
+import type { SimulationSession } from "@/types/session";
+
+export default function ReportPage() {
+  const router = useRouter();
+  const [session, setSession] = useState<SimulationSession | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [retryOpen, setRetryOpen] = useState(false);
+  const [names, setNames] = useState({ persona: "", subtitle: "", level: "", scenario: "" });
+
+  useEffect(() => {
+    const saved = loadSession();
+    setSession(saved);
+    if (saved) {
+      const custom = loadCustom();
+      const persona =
+        saved.personaId === CUSTOM_PERSONA_ID && custom?.persona
+          ? toPersona(custom.persona)
+          : getPersona(saved.personaId);
+      const scenario =
+        saved.scenarioId === CUSTOM_SCENARIO_ID && custom?.scenario
+          ? toScenario(custom.scenario)
+          : getScenario(saved.scenarioId);
+      setNames({
+        persona: persona.name,
+        subtitle: persona.subtitle,
+        level: persona.levelLabel,
+        scenario: scenario.title,
+      });
+    }
+    setLoaded(true);
+  }, []);
+
+  if (!loaded) {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-ivory px-6">
+        <p className="text-[13px] text-navy-muted">보고서를 불러오는 중입니다.</p>
+      </main>
+    );
+  }
+
+  const review = session?.evaluation;
+
+  if (!session || !review) {
+    return (
+      <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-ivory px-6 text-center">
+        <h1 className="text-[18px] font-bold text-navy">표시할 점검 결과가 없습니다.</h1>
+        <p className="max-w-[420px] text-[13px] leading-relaxed text-navy-muted">
+          대화를 마치고 점검을 완료하면 이 화면에 결과가 표시됩니다.
+        </p>
+        <Link
+          href="/"
+          className="rounded-xl bg-navy px-6 py-3 text-[13px] font-semibold text-white hover:bg-navy-soft"
+        >
+          시작 화면으로 이동
+        </Link>
+      </main>
+    );
+  }
+
+  const { summary, axes, warnings, recommendedDialogue, meta } = review;
+
+  return (
+    <main className="relative min-h-[100dvh] bg-ivory px-5 py-10 sm:px-8 sm:py-14">
+      <div className="mx-auto w-full max-w-[880px]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-gold">
+          Conversation Review
+        </p>
+        <h1 className="mt-2 text-[24px] font-bold text-navy sm:text-[30px]">임파워먼트 대화 점검</h1>
+        <p className="mt-2 text-[12.5px] leading-relaxed text-navy-muted">
+          {names.persona} · {names.subtitle} · {names.level}
+          <br />
+          {names.scenario}
+          {meta.axisSet === "B" ? " · 권한 밖 사안 점검 축" : ""}
+        </p>
+
+        {meta.mock ? (
+          <p className="mt-3 inline-block rounded-full border border-line bg-white px-3 py-1 text-[11.5px] text-navy-muted">
+            Mock Mode 점검 결과입니다. 키워드 기반이라 실제 판정과 다를 수 있습니다.
+          </p>
+        ) : null}
+
+        <section className="mt-6 rounded-2xl border border-line bg-white p-6 sm:p-8">
+          <p className="text-[16px] font-semibold leading-relaxed text-navy">{summary.oneLine}</p>
+          <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-center">
+            <div>
+              <dt className="text-[11px] text-navy-muted">충족</dt>
+              <dd className="mt-0.5 text-[18px] font-bold text-navy">
+                {summary.counts.done}
+                <span className="text-[12px] font-normal text-navy-muted"> / 20</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-navy-muted">부분</dt>
+              <dd className="mt-0.5 text-[18px] font-bold text-gold">{summary.counts.partial}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-navy-muted">미확인</dt>
+              <dd className="mt-0.5 text-[18px] font-bold text-[#7A6A6A]">
+                {summary.counts.missing}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-5 grid gap-2 border-t border-line pt-4 text-[12.5px] text-navy-muted sm:grid-cols-2">
+            <p>
+              가장 잘 다룬 축 · <strong className="text-navy">{summary.strongest}</strong>
+            </p>
+            <p>
+              가장 비어 있는 축 · <strong className="text-navy">{summary.weakest}</strong>
+            </p>
+          </div>
+          {summary.overall ? (
+            <p className="mt-4 text-[13px] leading-relaxed text-navy-soft">{summary.overall}</p>
+          ) : null}
+          {summary.expectedImpact ? (
+            <>
+              <h2 className="mt-4 text-[12px] font-semibold text-navy-muted">
+                팀장에게 미쳤을 것으로 보이는 영향
+              </h2>
+              <p className="mt-1 text-[13px] leading-relaxed text-navy-soft">
+                {summary.expectedImpact}
+              </p>
+            </>
+          ) : null}
+          <p className="mt-5 border-t border-line pt-4 text-[11.5px] text-navy-muted">
+            부서장 응답 {meta.userTurnCount}회 · 사용한 힌트 {meta.hintCount}회 · 검증으로 제거된 인용{" "}
+            {meta.removedEvidenceCount}건
+          </p>
+        </section>
+
+        <h2 className="mt-10 text-[16px] font-bold text-navy">축별 점검 결과</h2>
+        <div className="mt-4 space-y-4">
+          {axes.map((axis, index) => (
+            <AxisCard key={axis.key} axis={axis} index={index} />
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-4">
+          <WarningCard warnings={warnings} />
+
+          <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <h3 className="text-[15px] font-bold text-navy">개선 대화문</h3>
+            <p className="mt-1 text-[12px] text-navy-muted">
+              같은 상황에서 다시 말한다면 이렇게 할 수 있습니다.
+            </p>
+            <ol className="mt-4 space-y-3">
+              {[
+                { label: "대화 시작", text: recommendedDialogue.opening },
+                ...axes.map((a) => ({ label: a.title, text: a.betterResponseExample })),
+                { label: "실행 합의 마무리", text: recommendedDialogue.closing },
+              ]
+                .filter((item) => item.text)
+                .map((item) => (
+                  <li key={item.label} className="rounded-xl bg-ivory p-4">
+                    <p className="text-[11.5px] font-semibold tracking-wide text-gold">
+                      {item.label}
+                    </p>
+                    <p className="mt-1.5 break-anywhere text-[13px] leading-relaxed text-navy">
+                      “{item.text}”
+                    </p>
+                  </li>
+                ))}
+            </ol>
+          </section>
+
+          <TranscriptView
+            messages={session.messages}
+            personaName={names.persona}
+            evaluation={review}
+          />
+        </div>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => setRetryOpen(true)}
+            className="rounded-xl bg-navy px-7 py-3.5 text-[14px] font-semibold text-white hover:bg-navy-soft"
+          >
+            다시 도전하기
+          </button>
+          <Link
+            href="/"
+            className="rounded-xl border border-navy/20 px-7 py-3.5 text-center text-[14px] font-semibold text-navy hover:bg-white"
+          >
+            시작 화면으로
+          </Link>
+        </div>
+
+        <p className="mt-8 border-t border-line pt-5 text-[11.5px] leading-relaxed text-navy-muted">
+          이 점검표는 인사평가나 심리 진단이 아니라 대화에서 다루지 못한 영역을 찾기 위한 교육용
+          도구입니다. 모든 판정은 실제 대화에서 확인된 부서장 발언을 근거로 서버에서 다시
+          검증했습니다.
+        </p>
+      </div>
+
+      <ConfirmModal
+        open={retryOpen}
+        title="다시 도전할까요?"
+        description="이번 대화 기록과 점검 결과가 삭제되고 새 대화가 시작됩니다."
+        cancelLabel="취소"
+        confirmLabel="새로 시작"
+        tone="danger"
+        onCancel={() => setRetryOpen(false)}
+        onConfirm={() => {
+          clearSession();
+          router.push("/simulation");
+        }}
+      />
+    </main>
+  );
+}
