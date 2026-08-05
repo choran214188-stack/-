@@ -186,8 +186,7 @@ export function buildMockReview(messages: ChatMessage[], scenario: Scenario): Ra
   return {
     summary: {
       oneLine: "",
-      overall:
-        "Mock Mode 점검입니다. 문장의 의미를 해석하지 않고 대화에 등장한 표현과 길이만으로 판정합니다. 실제 실습에는 API Key를 연결해 사용하십시오.",
+      overall: "",
       expectedImpact: "",
     },
     axes,

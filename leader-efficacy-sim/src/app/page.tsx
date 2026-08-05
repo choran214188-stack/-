@@ -28,7 +28,7 @@ const deriveTitle = (situation: string) => {
 };
 
 const field =
-  "mt-2 w-full rounded-xl border border-line bg-white/80 px-4 py-3 text-[14px] leading-relaxed text-navy outline-none transition placeholder:text-navy-muted/50 focus:border-gold focus:bg-white focus:ring-4 focus:ring-gold/10";
+  "mt-2 w-full rounded-xl border border-hair bg-white/80 px-4 py-3 text-[14px] leading-relaxed text-navy outline-none transition placeholder:text-navy-muted/50 focus:border-gold focus:bg-white focus:ring-4 focus:ring-gold/10";
 
 const labelClass =
   "flex items-baseline gap-2 text-[12.5px] font-semibold tracking-tight text-navy";
@@ -101,11 +101,15 @@ export default function StartPage() {
   };
 
   return (
-    <main className="relative min-h-[100dvh] overflow-hidden bg-[radial-gradient(120%_90%_at_50%_-10%,#FFFFFF_0%,#FBF8F1_42%,#F3EFE5_100%)] px-5 py-14 sm:px-8 sm:py-20">
-      {/* 은은한 골드 후광 */}
+    <main className="relative min-h-[100dvh] overflow-hidden bg-[radial-gradient(125%_90%_at_50%_-8%,#FFFFFF_0%,#F5F7FB_44%,#E8ECF3_100%)] px-5 py-14 sm:px-8 sm:py-20">
+      {/* 상단 네이비 광택 + 골드 후광 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[46rem] -translate-x-1/2 rounded-full bg-navy/[0.06] blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-20 left-1/2 h-52 w-[30rem] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl"
       />
 
       <div className="relative mx-auto w-full max-w-[600px]">
@@ -131,7 +135,7 @@ export default function StartPage() {
 
         {/* 입력 카드 */}
         <section
-          className="animate-rise mt-11 overflow-hidden rounded-[26px] border border-line/70 bg-white/70 shadow-[0_28px_70px_-40px_rgba(22,35,60,0.45)] backdrop-blur-sm"
+          className="animate-rise mt-11 overflow-hidden rounded-[26px] border border-hair bg-white/80 shadow-[0_30px_80px_-42px_rgba(22,35,60,0.5)] backdrop-blur-sm"
           style={{ animationDelay: "140ms" }}
         >
           <div className="h-[3px] w-full bg-gradient-to-r from-gold-soft via-gold to-gold-soft" />

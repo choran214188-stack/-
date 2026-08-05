@@ -37,7 +37,7 @@ export function TranscriptView({ messages, personaName, evaluation }: Props) {
   }, [messages, personaName]);
 
   return (
-    <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+    <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-[15px] font-bold text-navy">전체 대화 다시 보기</h3>
         <button
@@ -59,7 +59,7 @@ export function TranscriptView({ messages, personaName, evaluation }: Props) {
               <li
                 key={row.id}
                 className={`rounded-xl border p-3.5 ${
-                  isUser ? "border-gold/40 bg-[#FFFDF6]" : "border-line bg-white"
+                  isUser ? "border-gold/40 bg-[#FFFDF6]" : "border-hair bg-white"
                 }`}
               >
                 <div className="flex flex-wrap items-center gap-2">

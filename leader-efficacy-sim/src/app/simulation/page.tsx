@@ -366,23 +366,23 @@ export default function SimulationPage() {
     [userTurnCount, scenario.recommendedUserTurns, evaluating],
   );
 
-  const badge = mockMode ? (
-    <span className="rounded-full border border-line bg-white px-3 py-1 text-[11px] font-semibold text-navy-muted">
-      Mock Mode · API Key 없이 동작 중
-    </span>
-  ) : null;
-
   return (
-    <PhoneFrame badge={badge}>
+    <PhoneFrame>
       <ChatHeader
         persona={persona}
         onBack={() => router.push("/")}
         onMenuSelect={handleMenu}
+        onEnd={() => setEndOpen(true)}
         userTurnCount={userTurnCount}
         maxUserTurns={maxUserTurns}
       />
 
-      <ChatMessageList messages={messages} typing={typing} personaName={persona.name} />
+      <ChatMessageList
+        messages={messages}
+        typing={typing}
+        personaName={persona.name}
+        personaImage={persona.profileImage}
+      />
 
       {error ? (
         <ErrorState

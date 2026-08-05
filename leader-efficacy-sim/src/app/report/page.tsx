@@ -45,7 +45,7 @@ export default function ReportPage() {
 
   if (!loaded) {
     return (
-      <main className="flex min-h-[100dvh] items-center justify-center bg-ivory px-6">
+      <main className="flex min-h-[100dvh] items-center justify-center bg-mist px-6">
         <p className="text-[13px] text-navy-muted">보고서를 불러오는 중입니다.</p>
       </main>
     );
@@ -55,14 +55,14 @@ export default function ReportPage() {
 
   if (!session || !review) {
     return (
-      <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-ivory px-6 text-center">
+      <main className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-mist px-6 text-center">
         <h1 className="text-[18px] font-bold text-navy">표시할 점검 결과가 없습니다.</h1>
         <p className="max-w-[420px] text-[13px] leading-relaxed text-navy-muted">
           대화를 마치고 점검을 완료하면 이 화면에 결과가 표시됩니다.
         </p>
         <Link
           href="/"
-          className="rounded-xl bg-navy px-6 py-3 text-[13px] font-semibold text-white hover:bg-navy-soft"
+          className="rounded-2xl bg-navy px-7 py-3.5 text-[13px] font-semibold text-white shadow-[0_16px_34px_-16px_rgba(22,35,60,0.75)] transition hover:bg-navy-soft"
         >
           시작 화면으로 이동
         </Link>
@@ -73,47 +73,53 @@ export default function ReportPage() {
   const { summary, axes, warnings, recommendedDialogue, meta } = review;
 
   return (
-    <main className="relative min-h-[100dvh] bg-ivory px-5 py-10 sm:px-8 sm:py-14">
+    <main className="relative min-h-[100dvh] bg-[radial-gradient(120%_70%_at_50%_-6%,#FFFFFF_0%,#F5F7FB_46%,#E9EDF4_100%)] px-5 py-12 sm:px-8 sm:py-16">
       <div className="mx-auto w-full max-w-[880px]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-gold">
-          Conversation Review
-        </p>
-        <h1 className="mt-2 text-[24px] font-bold text-navy sm:text-[30px]">임파워먼트 대화 점검</h1>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-navy-muted">
-          {names.persona} · {names.subtitle} · {names.level}
-          <br />
-          {names.scenario}
-          {meta.axisSet === "B" ? " · 권한 밖 사안 점검 축" : ""}
-        </p>
-
-        {meta.mock ? (
-          <p className="mt-3 inline-block rounded-full border border-line bg-white px-3 py-1 text-[11.5px] text-navy-muted">
-            Mock Mode 점검 결과입니다. 키워드 기반이라 실제 판정과 다를 수 있습니다.
+        <header className="text-center">
+          <div className="mx-auto flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-gold/60" />
+            <p className="font-serif-display text-[13px] italic tracking-[0.22em] text-gold">
+              Conversation Review
+            </p>
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-gold/60" />
+          </div>
+          <h1 className="mt-4 break-keep text-[25px] font-bold tracking-[-0.01em] text-navy sm:text-[32px]">
+            임파워먼트 대화 점검
+          </h1>
+          <p className="mt-3 break-keep text-[12.5px] leading-relaxed text-navy-muted">
+            {names.persona} · {names.subtitle} · {names.level}
+            <br />
+            {names.scenario}
+            {meta.axisSet === "B" ? " · 권한 밖 사안 점검 축" : ""}
           </p>
-        ) : null}
+        </header>
 
-        <section className="mt-6 rounded-2xl border border-line bg-white p-6 sm:p-8">
+        <section className="mt-8 overflow-hidden rounded-[24px] border border-hair bg-white shadow-[0_28px_70px_-44px_rgba(22,35,60,0.5)]">
+          <div className="h-[3px] w-full bg-gradient-to-r from-gold-soft via-gold to-gold-soft" />
+          <div className="p-6 sm:p-8">
           <p className="text-[16px] font-semibold leading-relaxed text-navy">{summary.oneLine}</p>
-          <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-center">
+          <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-hair pt-5 text-center">
             <div>
-              <dt className="text-[11px] text-navy-muted">충족</dt>
-              <dd className="mt-0.5 text-[18px] font-bold text-navy">
+              <dt className="text-[11px] tracking-wide text-navy-muted">충족</dt>
+              <dd className="mt-1 font-serif-display text-[26px] font-medium leading-none text-navy">
                 {summary.counts.done}
-                <span className="text-[12px] font-normal text-navy-muted"> / 20</span>
+                <span className="text-[13px] font-normal text-navy-muted"> / 20</span>
               </dd>
             </div>
             <div>
-              <dt className="text-[11px] text-navy-muted">부분</dt>
-              <dd className="mt-0.5 text-[18px] font-bold text-gold">{summary.counts.partial}</dd>
+              <dt className="text-[11px] tracking-wide text-navy-muted">부분</dt>
+              <dd className="mt-1 font-serif-display text-[26px] font-medium leading-none text-gold">
+                {summary.counts.partial}
+              </dd>
             </div>
             <div>
-              <dt className="text-[11px] text-navy-muted">미확인</dt>
-              <dd className="mt-0.5 text-[18px] font-bold text-[#7A6A6A]">
+              <dt className="text-[11px] tracking-wide text-navy-muted">미확인</dt>
+              <dd className="mt-1 font-serif-display text-[26px] font-medium leading-none text-[#7A6A6A]">
                 {summary.counts.missing}
               </dd>
             </div>
           </dl>
-          <div className="mt-5 grid gap-2 border-t border-line pt-4 text-[12.5px] text-navy-muted sm:grid-cols-2">
+          <div className="mt-5 grid gap-2 border-t border-hair pt-4 text-[12.5px] text-navy-muted sm:grid-cols-2">
             <p>
               가장 잘 다룬 축 · <strong className="text-navy">{summary.strongest}</strong>
             </p>
@@ -134,10 +140,11 @@ export default function ReportPage() {
               </p>
             </>
           ) : null}
-          <p className="mt-5 border-t border-line pt-4 text-[11.5px] text-navy-muted">
+          <p className="mt-5 border-t border-hair pt-4 text-[11.5px] text-navy-muted">
             부서장 응답 {meta.userTurnCount}회 · 사용한 힌트 {meta.hintCount}회 · 검증으로 제거된 인용{" "}
             {meta.removedEvidenceCount}건
           </p>
+          </div>
         </section>
 
         <h2 className="mt-10 text-[16px] font-bold text-navy">축별 점검 결과</h2>
@@ -150,7 +157,7 @@ export default function ReportPage() {
         <div className="mt-6 space-y-4">
           <WarningCard warnings={warnings} />
 
-          <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+          <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
             <h3 className="text-[15px] font-bold text-navy">개선 대화문</h3>
             <p className="mt-1 text-[12px] text-navy-muted">
               같은 상황에서 다시 말한다면 이렇게 할 수 있습니다.
@@ -163,7 +170,7 @@ export default function ReportPage() {
               ]
                 .filter((item) => item.text)
                 .map((item) => (
-                  <li key={item.label} className="rounded-xl bg-ivory p-4">
+                  <li key={item.label} className="rounded-xl border border-hair/70 bg-frost p-4">
                     <p className="text-[11.5px] font-semibold tracking-wide text-gold">
                       {item.label}
                     </p>
@@ -186,19 +193,22 @@ export default function ReportPage() {
           <button
             type="button"
             onClick={() => setRetryOpen(true)}
-            className="rounded-xl bg-navy px-7 py-3.5 text-[14px] font-semibold text-white hover:bg-navy-soft"
+            className="group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy px-7 py-4 text-[14px] font-semibold text-white shadow-[0_16px_34px_-16px_rgba(22,35,60,0.75)] transition hover:bg-navy-soft"
           >
             다시 도전하기
+            <span className="text-gold-soft transition-transform duration-200 group-hover:translate-x-1">
+              →
+            </span>
           </button>
           <Link
             href="/"
-            className="rounded-xl border border-navy/20 px-7 py-3.5 text-center text-[14px] font-semibold text-navy hover:bg-white"
+            className="rounded-2xl border border-navy/15 bg-white/60 px-7 py-4 text-center text-[14px] font-semibold text-navy transition hover:border-gold/50 hover:bg-white"
           >
             시작 화면으로
           </Link>
         </div>
 
-        <p className="mt-8 border-t border-line pt-5 text-[11.5px] leading-relaxed text-navy-muted">
+        <p className="mt-8 border-t border-hair pt-5 text-[11.5px] leading-relaxed text-navy-muted">
           이 점검표는 인사평가나 심리 진단이 아니라 대화에서 다루지 못한 영역을 찾기 위한 교육용
           도구입니다. 모든 판정은 실제 대화에서 확인된 부서장 발언을 근거로 서버에서 다시
           검증했습니다.

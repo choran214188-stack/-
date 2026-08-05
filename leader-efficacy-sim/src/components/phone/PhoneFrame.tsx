@@ -10,7 +10,7 @@ type Props = { children: React.ReactNode; badge?: React.ReactNode };
  */
 export function PhoneFrame({ children, badge }: Props) {
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#F3F1EC] sm:p-8">
+    <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#E7EBF1] sm:p-8">
       {badge ? <div className="hidden sm:mb-4 sm:block">{badge}</div> : null}
       <div
         className="
