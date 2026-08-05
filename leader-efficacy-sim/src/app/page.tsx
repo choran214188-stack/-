@@ -12,7 +12,7 @@ import {
 import { CUSTOM_PERSONA_ID, CUSTOM_SCENARIO_ID } from "@/lib/custom";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 
-const DEFAULT_LEVEL_LABEL = "난이도 중";
+const LEVELS = ["난이도 하", "난이도 중", "난이도 상", "난이도 최상"];
 
 const toLines = (v: string) =>
   v
@@ -42,6 +42,7 @@ export default function StartPage() {
   const [confirmNew, setConfirmNew] = useState(false);
 
   const [name, setName] = useState("");
+  const [levelIdx, setLevelIdx] = useState(1);
   const [personality, setPersonality] = useState("");
   const [situation, setSituation] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +56,8 @@ export default function StartPage() {
     if (stored.persona) {
       setName(stored.persona.name ?? "");
       setPersonality((stored.persona.personality ?? []).join("\n"));
+      const idx = LEVELS.indexOf(stored.persona.levelLabel ?? "난이도 중");
+      setLevelIdx(idx >= 0 ? idx : 1);
     }
     if (stored.scenario) {
       setSituation(stored.scenario.situation ?? "");
@@ -73,8 +76,8 @@ export default function StartPage() {
     saveCustom({
       persona: {
         name: name.trim(),
-        levelLabel: DEFAULT_LEVEL_LABEL,
-        level: 2,
+        levelLabel: LEVELS[levelIdx],
+        level: levelIdx + 1,
         subtitle: "",
         tagline: personalityLines[0] ?? "",
         greeting: "",
@@ -156,11 +159,37 @@ export default function StartPage() {
             </div>
 
             <div>
-              <label className={labelClass} htmlFor="c-personality">
+              <span className={labelClass}>
                 <span className={numeral}>02</span>
+                난이도
+                <span className="text-[11.5px] font-normal text-navy-muted/70">
+                  팀장이 설득되는 정도
+                </span>
+              </span>
+              <div className="mt-2 grid grid-cols-4 gap-1.5 rounded-xl border border-hair bg-white/60 p-1">
+                {["하", "중", "상", "최상"].map((lv, i) => (
+                  <button
+                    key={lv}
+                    type="button"
+                    onClick={() => setLevelIdx(i)}
+                    className={`rounded-lg py-2 text-[13px] font-semibold transition ${
+                      levelIdx === i
+                        ? "bg-navy text-white shadow-sm"
+                        : "text-navy-muted hover:bg-white"
+                    }`}
+                  >
+                    {lv}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="c-personality">
+                <span className={numeral}>03</span>
                 성격
                 <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  한 줄에 하나씩
+                  말투·가치관·불안 요소를 한 줄에 하나씩
                 </span>
               </label>
               <textarea
@@ -175,10 +204,10 @@ export default function StartPage() {
 
             <div>
               <label className={labelClass} htmlFor="c-situation">
-                <span className={numeral}>03</span>
+                <span className={numeral}>04</span>
                 상황
                 <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  구체적으로
+                  사건·시점·지금 결정할 일을 구체적으로
                 </span>
               </label>
               <textarea
