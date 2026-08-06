@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EmojiIcon, ImageIcon, PlusIcon, SendIcon } from "./icons";
 
 type Props = {
@@ -16,8 +16,19 @@ const MAX_ROWS_PX = 108;
 export function ChatComposer({ disabled, onSend, onShowScenario, onShowHint, onEnd }: Props) {
   const [value, setValue] = useState("");
   const [plusOpen, setPlusOpen] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
   const composingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 모바일(터치) 기기에서는 엔터를 줄바꿈으로, 전송은 보내기 버튼으로만.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const coarse =
+      window.matchMedia?.("(pointer: coarse)")?.matches ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0;
+    setIsTouch(Boolean(coarse));
+  }, []);
 
   const canSend = value.trim().length > 0 && !disabled;
 
@@ -112,6 +123,9 @@ export function ChatComposer({ disabled, onSend, onShowScenario, onShowHint, onE
           }}
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
+            // 모바일: 엔터는 줄바꿈 (전송은 보내기 버튼)
+            if (isTouch) return;
+            // 데스크톱: Shift+Enter 줄바꿈, Enter 전송
             if (e.shiftKey) return;
             if (composingRef.current || e.nativeEvent.isComposing) return;
             e.preventDefault();

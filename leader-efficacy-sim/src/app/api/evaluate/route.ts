@@ -79,6 +79,7 @@ export async function POST(request: Request) {
       messages: [{ role: "user", content: extra ? `${userPrompt}\n\n${extra}` : userPrompt }],
       maxTokens: 8000,
       temperature: 0.2,
+      jsonMode: true,
     });
     return reviewSchema.parse(extractJson(text));
   };

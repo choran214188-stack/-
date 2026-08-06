@@ -17,7 +17,13 @@ export class OpenAIProvider implements LlmProvider {
     this.model = model || "gpt-4o-mini";
   }
 
-  async complete({ system, messages, maxTokens, temperature }: CompletionRequest): Promise<string> {
+  async complete({
+    system,
+    messages,
+    maxTokens,
+    temperature,
+    jsonMode,
+  }: CompletionRequest): Promise<string> {
     let response: Response;
     try {
       response = await fetch(API_URL, {
@@ -31,6 +37,7 @@ export class OpenAIProvider implements LlmProvider {
           max_tokens: maxTokens ?? 1024,
           temperature: temperature ?? 0.8,
           messages: [{ role: "system", content: system }, ...messages],
+          ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
         }),
       });
     } catch {
