@@ -104,10 +104,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ evaluation });
   } catch (error) {
     const code = error instanceof LlmError ? error.code : "invalid_review";
-    console.error("[api/evaluate] failed", code, error);
-    return NextResponse.json(
-      { error: "점검 결과를 생성하지 못했습니다. 대화는 그대로 남아 있으니 다시 시도해주세요." },
-      { status: 502 },
-    );
+    console.error("[api/evaluate] failed, falling back to keyword review", code, error);
+    // 실제 모델 평가가 실패해도 리포트는 항상 생성한다(키워드 기반 안전망).
+    try {
+      const raw = buildMockReview(chatMessages, scenario);
+      const evaluation = normalizeReview({
+        raw,
+        messages: chatMessages,
+        scenario,
+        hintCount,
+        mock: true,
+      });
+      return NextResponse.json({ evaluation });
+    } catch (fallbackError) {
+      console.error("[api/evaluate] fallback failed", fallbackError);
+      return NextResponse.json(
+        { error: "점검 결과를 생성하지 못했습니다. 대화는 그대로 남아 있으니 다시 시도해주세요." },
+        { status: 502 },
+      );
+    }
   }
 }
