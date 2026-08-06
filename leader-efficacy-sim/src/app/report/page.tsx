@@ -190,12 +190,20 @@ export default function ReportPage() {
           </section>
         </div>
 
-        <h2 className="mt-10 text-[16px] font-bold text-navy">축별 점검 결과</h2>
-        <div className="mt-4 space-y-4">
-          {axes.map((axis, index) => (
-            <AxisCard key={axis.key} axis={axis} index={index} />
-          ))}
-        </div>
+        <details className="group mt-10">
+          <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-hair bg-white px-5 py-4 text-[15px] font-bold text-navy [&::-webkit-details-marker]:hidden">
+            축별 상세 점검
+            <span className="text-[12px] font-medium text-navy-muted">
+              <span className="group-open:hidden">자세히 보기 ▾</span>
+              <span className="hidden group-open:inline">접기 ▴</span>
+            </span>
+          </summary>
+          <div className="mt-4 space-y-4">
+            {axes.map((axis, index) => (
+              <AxisCard key={axis.key} axis={axis} index={index} />
+            ))}
+          </div>
+        </details>
 
         <div className="mt-6 space-y-4">
           <WarningCard warnings={warnings} />

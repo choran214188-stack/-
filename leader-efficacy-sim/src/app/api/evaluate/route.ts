@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     const text = await provider.complete({
       system: EVALUATION_SYSTEM_PROMPT,
       messages: [{ role: "user", content: extra ? `${userPrompt}\n\n${extra}` : userPrompt }],
-      maxTokens: 8000,
+      maxTokens: 4000,
       temperature: 0.2,
       jsonMode: true,
     });

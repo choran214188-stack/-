@@ -130,6 +130,7 @@ export default function SimulationPage() {
     setMessages([]);
     setUserTurnCount(0);
     setHintCount(0);
+    setTyping(true);
     try {
       const res = await fetch("/api/simulation/start", {
         method: "POST",
@@ -146,6 +147,7 @@ export default function SimulationPage() {
       setMockMode(data.mock);
       await playOpening(data.openingMessage);
     } catch {
+      setTyping(false);
       setSessionId(createId("sess"));
       setError("시뮬레이션을 시작하지 못했습니다. 다시 시도해주세요.");
       setRetry(() => () => void startFresh());
