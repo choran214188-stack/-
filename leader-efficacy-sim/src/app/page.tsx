@@ -67,18 +67,11 @@ export default function StartPage() {
 
     const stored = loadCustom();
     if (!stored) return;
+    // 이름과 난이도만 복원한다. 성격·상황 입력창은 항상 비운 상태로 시작한다.
     if (stored.persona) {
       setName(stored.persona.name ?? "");
       const idx = LEVELS.indexOf(stored.persona.levelLabel ?? "난이도 중");
       setLevelIdx(idx >= 0 ? idx : 1);
-      if ((stored.persona.personality ?? []).length) {
-        setPersonaCustomOn(true);
-        setPersonaCustom((stored.persona.personality ?? []).join("\n"));
-      }
-    }
-    if (stored.scenario?.situation) {
-      setSituationCustomOn(true);
-      setSituationCustom(stored.scenario.situation);
     }
   }, []);
 
@@ -238,7 +231,10 @@ export default function StartPage() {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setPersonaCustomOn(true)}
+                  onClick={() => {
+                    if (!personaCustomOn) setPersonaCustom("");
+                    setPersonaCustomOn(true);
+                  }}
                   className={selChip(personaCustomOn)}
                 >
                   직접 입력
@@ -288,7 +284,10 @@ export default function StartPage() {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setSituationCustomOn(true)}
+                  onClick={() => {
+                    if (!situationCustomOn) setSituationCustom("");
+                    setSituationCustomOn(true);
+                  }}
                   className={selChip(situationCustomOn)}
                 >
                   직접 입력
