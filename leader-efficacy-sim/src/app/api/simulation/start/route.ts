@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const persona = parsedPersona.success
     ? toPersona(parsedPersona.data)
     : getPersona(body.personaId ?? scenario.personaId ?? DEFAULT_PERSONA_ID);
-  const provider = getProvider();
+  const provider = getProvider("chat");
 
   let opening = getOpening(scenario, persona);
 

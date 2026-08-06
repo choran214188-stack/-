@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   const userTurnCount =
     parsed.data.userTurnCount ?? messages.filter((m) => m.role === "user").length;
 
-  const provider = getProvider();
+  const provider = getProvider("chat");
   const createdAt = new Date().toISOString();
 
   if (provider.isMock) {
