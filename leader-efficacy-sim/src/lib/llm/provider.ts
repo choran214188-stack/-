@@ -5,6 +5,8 @@ export type CompletionRequest = {
   messages: LlmMessage[];
   maxTokens?: number;
   temperature?: number;
+  /** JSON 객체만 출력하도록 강제 (지원하는 provider 에서만 적용) */
+  jsonMode?: boolean;
 };
 
 export interface LlmProvider {
