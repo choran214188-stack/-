@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   clearSession,
-  loadCustom,
   loadSession,
   saveCustom,
   saveSelection,
@@ -62,17 +61,9 @@ export default function StartPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 새로 들어오면 입력값은 항상 초기 상태에서 시작한다(이전 정보 복원하지 않음).
     const saved = loadSession();
     setHasSaved(Boolean(saved && saved.messages.length > 0));
-
-    const stored = loadCustom();
-    if (!stored) return;
-    // 이름과 난이도만 복원한다. 성격·상황 입력창은 항상 비운 상태로 시작한다.
-    if (stored.persona) {
-      setName(stored.persona.name ?? "");
-      const idx = LEVELS.indexOf(stored.persona.levelLabel ?? "난이도 중");
-      setLevelIdx(idx >= 0 ? idx : 1);
-    }
   }, []);
 
   const start = () => {
