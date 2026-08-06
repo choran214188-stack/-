@@ -42,6 +42,8 @@ export const reviewSchema = z.object({
       oneLine: z.string().default(""),
       overall: z.string().default(""),
       expectedImpact: z.string().default(""),
+      strengths: z.array(z.string()).default([]),
+      improvements: z.array(z.string()).default([]),
     })
     .default({}),
   axes: z.array(axisSchema).default([]),

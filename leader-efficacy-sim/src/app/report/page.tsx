@@ -119,6 +119,9 @@ export default function ReportPage() {
               </dd>
             </div>
           </dl>
+          <p className="mt-3 text-center text-[11.5px] leading-relaxed text-navy-muted">
+            짧은 연습 대화라 모든 항목을 다루기는 어렵습니다. 다룬 부분 위주로 봐주세요.
+          </p>
           <div className="mt-5 grid gap-2 border-t border-hair pt-4 text-[12.5px] text-navy-muted sm:grid-cols-2">
             <p>
               가장 잘 다룬 축 · <strong className="text-navy">{summary.strongest}</strong>
@@ -127,25 +130,65 @@ export default function ReportPage() {
               가장 비어 있는 축 · <strong className="text-navy">{summary.weakest}</strong>
             </p>
           </div>
-          {summary.overall ? (
-            <p className="mt-4 text-[13px] leading-relaxed text-navy-soft">{summary.overall}</p>
-          ) : null}
-          {summary.expectedImpact ? (
-            <>
-              <h2 className="mt-4 text-[12px] font-semibold text-navy-muted">
-                팀장에게 미쳤을 것으로 보이는 영향
-              </h2>
-              <p className="mt-1 text-[13px] leading-relaxed text-navy-soft">
-                {summary.expectedImpact}
-              </p>
-            </>
-          ) : null}
           <p className="mt-5 border-t border-hair pt-4 text-[11.5px] text-navy-muted">
             부서장 응답 {meta.userTurnCount}회 · 사용한 힌트 {meta.hintCount}회 · 검증으로 제거된 인용{" "}
             {meta.removedEvidenceCount}건
           </p>
           </div>
         </section>
+
+        {summary.overall ? (
+          <section className="mt-6 rounded-2xl border border-hair bg-navy p-6 sm:p-7">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-soft">
+              총평
+            </p>
+            <p className="mt-2.5 text-[14.5px] leading-relaxed text-white/95">{summary.overall}</p>
+          </section>
+        ) : null}
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
+            <h3 className="flex items-center gap-2 text-[14px] font-bold text-navy">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E7F1EA] text-[12px] text-[#2E7D57]">
+                ✓
+              </span>
+              잘한 점
+            </h3>
+            {summary.strengths.length ? (
+              <ul className="mt-3 space-y-2.5">
+                {summary.strengths.map((t, i) => (
+                  <li key={i} className="flex gap-2 text-[13px] leading-relaxed text-navy-soft">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#2E7D57]" />
+                    <span className="break-anywhere">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-[12.5px] text-navy-muted">이번 대화에서 확인된 강점이 적습니다.</p>
+            )}
+          </section>
+
+          <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
+            <h3 className="flex items-center gap-2 text-[14px] font-bold text-navy">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-pale text-[12px] text-gold">
+                ↑
+              </span>
+              개선할 점
+            </h3>
+            {summary.improvements.length ? (
+              <ul className="mt-3 space-y-2.5">
+                {summary.improvements.map((t, i) => (
+                  <li key={i} className="flex gap-2 text-[13px] leading-relaxed text-navy-soft">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
+                    <span className="break-anywhere">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-[12.5px] text-navy-muted">큰 개선점 없이 잘 이끌어갔습니다.</p>
+            )}
+          </section>
+        </div>
 
         <h2 className="mt-10 text-[16px] font-bold text-navy">축별 점검 결과</h2>
         <div className="mt-4 space-y-4">

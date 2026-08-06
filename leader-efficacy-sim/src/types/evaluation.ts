@@ -32,6 +32,8 @@ export type ReviewResult = {
     oneLine: string;
     overall: string;
     expectedImpact: string;
+    strengths: string[];
+    improvements: string[];
     strongest: string;
     weakest: string;
     counts: { done: number; partial: number; missing: number };
