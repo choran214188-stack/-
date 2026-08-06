@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   const persona = customPersona
     ? toPersona(customPersona)
     : getPersona(personaId ?? scenario.personaId);
-  const provider = getProvider();
+  const provider = getProvider("evaluate");
   const chatMessages = messages as ChatMessage[];
 
   if (provider.isMock) {
