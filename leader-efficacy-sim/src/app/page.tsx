@@ -13,9 +13,6 @@ import { CUSTOM_PERSONA_ID, CUSTOM_SCENARIO_ID } from "@/lib/custom";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { PERSONALITY_PRESETS, SITUATION_PRESETS } from "@/config/presets";
 
-const presetChip =
-  "rounded-full border border-hair bg-white/70 px-3 py-1.5 text-[12px] font-medium text-navy-soft transition hover:border-gold hover:bg-white hover:text-navy";
-
 const LEVELS = ["난이도 하", "난이도 중", "난이도 상", "난이도 최상"];
 
 const toLines = (v: string) =>
@@ -37,8 +34,14 @@ const field =
 const labelClass =
   "flex items-baseline gap-2 text-[12.5px] font-semibold tracking-tight text-navy";
 
-const numeral =
-  "font-serif-display text-[15px] font-medium leading-none text-gold";
+const numeral = "font-serif-display text-[15px] font-medium leading-none text-gold";
+
+const selChip = (on: boolean) =>
+  `rounded-full border px-3 py-1.5 text-[12px] font-medium transition ${
+    on
+      ? "border-navy bg-navy text-white shadow-sm"
+      : "border-hair bg-white/70 text-navy-soft hover:border-gold hover:text-navy"
+  }`;
 
 export default function StartPage() {
   const router = useRouter();
@@ -47,8 +50,15 @@ export default function StartPage() {
 
   const [name, setName] = useState("");
   const [levelIdx, setLevelIdx] = useState(1);
-  const [personality, setPersonality] = useState("");
-  const [situation, setSituation] = useState("");
+
+  const [personaIdx, setPersonaIdx] = useState(0);
+  const [personaCustomOn, setPersonaCustomOn] = useState(false);
+  const [personaCustom, setPersonaCustom] = useState("");
+
+  const [situationIdx, setSituationIdx] = useState(0);
+  const [situationCustomOn, setSituationCustomOn] = useState(false);
+  const [situationCustom, setSituationCustom] = useState("");
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,39 +69,55 @@ export default function StartPage() {
     if (!stored) return;
     if (stored.persona) {
       setName(stored.persona.name ?? "");
-      setPersonality((stored.persona.personality ?? []).join("\n"));
       const idx = LEVELS.indexOf(stored.persona.levelLabel ?? "난이도 중");
       setLevelIdx(idx >= 0 ? idx : 1);
+      if ((stored.persona.personality ?? []).length) {
+        setPersonaCustomOn(true);
+        setPersonaCustom((stored.persona.personality ?? []).join("\n"));
+      }
     }
-    if (stored.scenario) {
-      setSituation(stored.scenario.situation ?? "");
+    if (stored.scenario?.situation) {
+      setSituationCustomOn(true);
+      setSituationCustom(stored.scenario.situation);
     }
   }, []);
 
   const start = () => {
     if (!name.trim()) return setError("팀장 이름을 입력해주세요.");
-    if (!personality.trim()) return setError("팀장의 성격을 입력해주세요.");
-    if (situation.trim().length < 20)
-      return setError("상황을 조금 더 구체적으로 적어주세요. (20자 이상)");
-    setError(null);
 
-    const personalityLines = toLines(personality);
+    const personalityLines = personaCustomOn
+      ? toLines(personaCustom)
+      : PERSONALITY_PRESETS[personaIdx].lines;
+    if (personalityLines.length === 0)
+      return setError("성격을 선택하거나 직접 입력해주세요.");
+
+    const situationText = (
+      situationCustomOn ? situationCustom : SITUATION_PRESETS[situationIdx].text
+    ).trim();
+    if (situationText.length < 20)
+      return setError("상황을 조금 더 구체적으로 적어주세요. (20자 이상)");
+
+    const situationTitle = situationCustomOn
+      ? deriveTitle(situationText)
+      : SITUATION_PRESETS[situationIdx].label;
+
+    setError(null);
 
     saveCustom({
       persona: {
         name: name.trim(),
         levelLabel: LEVELS[levelIdx],
         level: levelIdx + 1,
-        subtitle: "",
+        subtitle: personaCustomOn ? "" : PERSONALITY_PRESETS[personaIdx].label,
         tagline: personalityLines[0] ?? "",
         greeting: "",
         personality: personalityLines,
         resistancePatterns: [],
       },
       scenario: {
-        title: deriveTitle(situation),
+        title: situationTitle,
         summary: "",
-        situation: situation.trim(),
+        situation: situationText,
         challenge: "",
         successCondition: "",
         opening: [],
@@ -135,7 +161,7 @@ export default function StartPage() {
           </h1>
 
           <p className="mx-auto mt-5 max-w-[420px] break-keep text-[13.5px] leading-relaxed text-navy-soft">
-            팀장의 이름과 성격, 지금 처한 상황을 적으면 그 설정에 맞춰 AI 팀장과 실제처럼 대화합니다.
+            팀장의 이름과 성격, 지금 처한 상황을 고르면 그 설정에 맞춰 AI 팀장과 실제처럼 대화합니다.
             대화가 끝나면 임파워먼트 네 가지 축을 얼마나 다뤘는지 점검해 드립니다.
           </p>
         </header>
@@ -189,63 +215,98 @@ export default function StartPage() {
             </div>
 
             <div>
-              <label className={labelClass} htmlFor="c-personality">
+              <span className={labelClass}>
                 <span className={numeral}>03</span>
                 성격
                 <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  유형을 고르거나 직접 적으세요
+                  유형을 고르거나 직접 입력
                 </span>
-              </label>
+              </span>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {PERSONALITY_PRESETS.map((p) => (
+                {PERSONALITY_PRESETS.map((p, i) => (
                   <button
                     key={p.label}
                     type="button"
-                    onClick={() => setPersonality(p.lines.join("\n"))}
-                    className={presetChip}
+                    onClick={() => {
+                      setPersonaCustomOn(false);
+                      setPersonaIdx(i);
+                    }}
+                    className={selChip(!personaCustomOn && personaIdx === i)}
                   >
                     {p.label}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setPersonaCustomOn(true)}
+                  className={selChip(personaCustomOn)}
+                >
+                  직접 입력
+                </button>
               </div>
-              <textarea
-                id="c-personality"
-                rows={4}
-                className={field}
-                value={personality}
-                onChange={(e) => setPersonality(e.target.value)}
-                placeholder={"위에서 유형을 고르면 채워지고, 직접 수정할 수 있어요.\n한 줄에 하나씩 적어주세요."}
-              />
+              {personaCustomOn ? (
+                <textarea
+                  rows={4}
+                  className={field}
+                  value={personaCustom}
+                  onChange={(e) => setPersonaCustom(e.target.value)}
+                  placeholder={"한 줄에 하나씩 (말투·가치관·불안 요소 등)\n예) 책임감이 강하고 결과로 자신을 판단한다"}
+                />
+              ) : (
+                <ul className="mt-2 space-y-1.5 rounded-xl border border-hair bg-frost px-4 py-3 text-[13px] leading-relaxed text-navy-soft">
+                  {PERSONALITY_PRESETS[personaIdx].lines.map((l) => (
+                    <li key={l} className="flex gap-2">
+                      <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-gold" />
+                      <span>{l}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div>
-              <label className={labelClass} htmlFor="c-situation">
+              <span className={labelClass}>
                 <span className={numeral}>04</span>
                 상황
                 <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  상황을 고르거나 직접 적으세요
+                  상황을 고르거나 직접 입력
                 </span>
-              </label>
+              </span>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {SITUATION_PRESETS.map((p) => (
+                {SITUATION_PRESETS.map((p, i) => (
                   <button
                     key={p.label}
                     type="button"
-                    onClick={() => setSituation(p.text)}
-                    className={presetChip}
+                    onClick={() => {
+                      setSituationCustomOn(false);
+                      setSituationIdx(i);
+                    }}
+                    className={selChip(!situationCustomOn && situationIdx === i)}
                   >
                     {p.label}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setSituationCustomOn(true)}
+                  className={selChip(situationCustomOn)}
+                >
+                  직접 입력
+                </button>
               </div>
-              <textarea
-                id="c-situation"
-                rows={5}
-                className={field}
-                value={situation}
-                onChange={(e) => setSituation(e.target.value)}
-                placeholder="위에서 상황을 고르면 채워지고, 직접 수정할 수 있어요. 언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
-              />
+              {situationCustomOn ? (
+                <textarea
+                  rows={5}
+                  className={field}
+                  value={situationCustom}
+                  onChange={(e) => setSituationCustom(e.target.value)}
+                  placeholder="언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
+                />
+              ) : (
+                <p className="mt-2 break-keep rounded-xl border border-hair bg-frost px-4 py-3 text-[13px] leading-relaxed text-navy-soft">
+                  {SITUATION_PRESETS[situationIdx].text}
+                </p>
+              )}
             </div>
 
             {error ? (
