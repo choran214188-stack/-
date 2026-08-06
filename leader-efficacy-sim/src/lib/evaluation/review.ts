@@ -116,11 +116,31 @@ export function normalizeReview(params: {
   );
   const s = buildSummary(axes);
 
+  const clean = (arr?: string[]) =>
+    (arr ?? []).map((x) => (x ?? "").trim()).filter(Boolean).slice(0, 4);
+  let strengths = clean(raw.summary?.strengths);
+  let improvements = clean(raw.summary?.improvements);
+  // 모델이 비워 보내거나 mock 인 경우: 판정에서 자동으로 유도한다.
+  if (strengths.length === 0) {
+    strengths = axes
+      .flatMap((a) => a.criteria.filter((c) => c.mark !== "×").map((c) => `${a.title} — '${c.name}' 시도가 보였습니다.`))
+      .slice(0, 3);
+    if (strengths.length === 0) strengths = ["대화를 끝까지 이어가며 팀장의 이야기를 들으려 한 점이 좋았습니다."];
+  }
+  if (improvements.length === 0) {
+    improvements = axes
+      .flatMap((a) => a.criteria.filter((c) => c.mark === "×").map((c) => c.missing))
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
   return {
     summary: {
       oneLine: raw.summary?.oneLine?.trim() || s.oneLine,
-      overall: raw.summary?.overall ?? "",
+      overall: raw.summary?.overall?.trim() || s.oneLine,
       expectedImpact: raw.summary?.expectedImpact ?? "",
+      strengths,
+      improvements,
       strongest: s.strongest,
       weakest: s.weakest,
       counts: { done: s.done, partial: s.partial, missing: s.missing },
@@ -188,6 +208,8 @@ export function buildMockReview(messages: ChatMessage[], scenario: Scenario): Ra
       oneLine: "",
       overall: "",
       expectedImpact: "",
+      strengths: [],
+      improvements: [],
     },
     axes,
     warnings,

@@ -11,6 +11,10 @@ import {
 } from "@/lib/storage/session-storage";
 import { CUSTOM_PERSONA_ID, CUSTOM_SCENARIO_ID } from "@/lib/custom";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { PERSONALITY_PRESETS, SITUATION_PRESETS } from "@/config/presets";
+
+const presetChip =
+  "rounded-full border border-hair bg-white/70 px-3 py-1.5 text-[12px] font-medium text-navy-soft transition hover:border-gold hover:bg-white hover:text-navy";
 
 const LEVELS = ["난이도 하", "난이도 중", "난이도 상", "난이도 최상"];
 
@@ -189,16 +193,28 @@ export default function StartPage() {
                 <span className={numeral}>03</span>
                 성격
                 <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  말투·가치관·불안 요소를 한 줄에 하나씩
+                  유형을 고르거나 직접 적으세요
                 </span>
               </label>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {PERSONALITY_PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => setPersonality(p.lines.join("\n"))}
+                    className={presetChip}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
               <textarea
                 id="c-personality"
                 rows={4}
                 className={field}
                 value={personality}
                 onChange={(e) => setPersonality(e.target.value)}
-                placeholder={"예) 책임감이 강하고 결과로 자신을 판단한다\n약점을 드러내는 것을 불편해한다\n막연한 격려에는 근거를 되묻는다"}
+                placeholder={"위에서 유형을 고르면 채워지고, 직접 수정할 수 있어요.\n한 줄에 하나씩 적어주세요."}
               />
             </div>
 
@@ -207,16 +223,28 @@ export default function StartPage() {
                 <span className={numeral}>04</span>
                 상황
                 <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  사건·시점·지금 결정할 일을 구체적으로
+                  상황을 고르거나 직접 적으세요
                 </span>
               </label>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {SITUATION_PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => setSituation(p.text)}
+                    className={presetChip}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
               <textarea
                 id="c-situation"
                 rows={5}
                 className={field}
                 value={situation}
                 onChange={(e) => setSituation(e.target.value)}
-                placeholder="언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
+                placeholder="위에서 상황을 고르면 채워지고, 직접 수정할 수 있어요. 언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
               />
             </div>
 
