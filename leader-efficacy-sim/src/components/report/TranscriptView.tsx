@@ -12,11 +12,11 @@ export function TranscriptView({ messages, personaName, evaluation }: Props) {
 
   const tagsByTurn = useMemo(() => {
     const map = new Map<number, Set<string>>();
-    for (const axis of evaluation.axes) {
-      for (const criterion of axis.criteria) {
+    for (const domain of evaluation.domains) {
+      for (const criterion of domain.criteria) {
         for (const evidence of criterion.evidence) {
           if (!map.has(evidence.turn)) map.set(evidence.turn, new Set());
-          map.get(evidence.turn)?.add(`${axis.title} 근거`);
+          map.get(evidence.turn)?.add(`${domain.title} 근거`);
         }
       }
     }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AxisCard } from "@/components/report/AxisCard";
+import { DomainCard } from "@/components/report/DomainCard";
 import { WarningCard } from "@/components/report/WarningCard";
 import { TranscriptView } from "@/components/report/TranscriptView";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
@@ -70,7 +70,8 @@ export default function ReportPage() {
     );
   }
 
-  const { summary, axes, warnings, recommendedDialogue, meta } = review;
+  const { summary, domains, warnings, meta, score100, grade } = review;
+  const pct = score100;
 
   return (
     <main className="relative min-h-[100dvh] bg-[radial-gradient(120%_70%_at_50%_-6%,#FFFFFF_0%,#F5F7FB_46%,#E9EDF4_100%)] px-5 py-12 sm:px-8 sm:py-16">
@@ -90,53 +91,55 @@ export default function ReportPage() {
             {names.persona} · {names.subtitle} · {names.level}
             <br />
             {names.scenario}
-            {meta.axisSet === "B" ? " · 권한 밖 사안 점검 축" : ""}
           </p>
         </header>
 
+        {/* 종합 점수 */}
         <section className="mt-8 overflow-hidden rounded-[24px] border border-hair bg-white shadow-[0_28px_70px_-44px_rgba(22,35,60,0.5)]">
           <div className="h-[3px] w-full bg-gradient-to-r from-gold-soft via-gold to-gold-soft" />
           <div className="p-6 sm:p-8">
-          <p className="text-[16px] font-semibold leading-relaxed text-navy">{summary.oneLine}</p>
-          <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-hair pt-5 text-center">
-            <div>
-              <dt className="text-[11px] tracking-wide text-navy-muted">충족</dt>
-              <dd className="mt-1 font-serif-display text-[26px] font-medium leading-none text-navy">
-                {summary.counts.done}
-                <span className="text-[13px] font-normal text-navy-muted"> / 20</span>
-              </dd>
+            <div className="flex flex-col items-center">
+              <span className="rounded-full bg-navy px-3 py-1 text-[11.5px] font-semibold tracking-wide text-gold-soft">
+                {grade}
+              </span>
+              <p className="mt-3 font-serif-display text-[52px] font-medium leading-none text-navy">
+                {score100}
+                <span className="text-[20px] font-normal text-navy-muted"> / 100</span>
+              </p>
+              <div className="mt-4 h-2 w-full max-w-[320px] overflow-hidden rounded-full bg-[#EDEFF4]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-gold-soft to-gold"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
             </div>
-            <div>
-              <dt className="text-[11px] tracking-wide text-navy-muted">부분</dt>
-              <dd className="mt-1 font-serif-display text-[26px] font-medium leading-none text-gold">
-                {summary.counts.partial}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-[11px] tracking-wide text-navy-muted">미확인</dt>
-              <dd className="mt-1 font-serif-display text-[26px] font-medium leading-none text-[#7A6A6A]">
-                {summary.counts.missing}
-              </dd>
-            </div>
-          </dl>
-          <p className="mt-3 text-center text-[11.5px] leading-relaxed text-navy-muted">
-            짧은 연습 대화라 모든 항목을 다루기는 어렵습니다. 다룬 부분 위주로 봐주세요.
-          </p>
-          <div className="mt-5 grid gap-2 border-t border-hair pt-4 text-[12.5px] text-navy-muted sm:grid-cols-2">
-            <p>
-              가장 잘 다룬 축 · <strong className="text-navy">{summary.strongest}</strong>
+
+            <p className="mt-5 text-center text-[15px] font-semibold leading-relaxed text-navy">
+              {summary.oneLine}
             </p>
-            <p>
-              가장 비어 있는 축 · <strong className="text-navy">{summary.weakest}</strong>
+
+            <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-hair pt-5 text-center">
+              {domains.map((d) => (
+                <div key={d.key}>
+                  <dt className="text-[12px] tracking-wide text-navy-muted">{d.title}</dt>
+                  <dd className="mt-1 font-serif-display text-[24px] font-medium leading-none text-navy">
+                    {d.score}
+                    <span className="text-[12px] font-normal text-navy-muted"> / {d.max}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            <p className="mt-5 text-center text-[11.5px] leading-relaxed text-navy-muted">
+              짧은 연습 대화라 모든 항목을 높게 받기는 어렵습니다. 다룬 부분 위주로 봐주세요.
             </p>
-          </div>
-          <p className="mt-5 border-t border-hair pt-4 text-[11.5px] text-navy-muted">
-            부서장 응답 {meta.userTurnCount}회 · 사용한 힌트 {meta.hintCount}회 · 검증으로 제거된 인용{" "}
-            {meta.removedEvidenceCount}건
-          </p>
+            <p className="mt-4 border-t border-hair pt-4 text-[11.5px] text-navy-muted">
+              부서장 응답 {meta.userTurnCount}회 · 사용한 힌트 {meta.hintCount}회
+            </p>
           </div>
         </section>
 
+        {/* 총평 */}
         {summary.overall ? (
           <section className="mt-6 rounded-2xl border border-hair bg-navy p-6 sm:p-7">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-soft">
@@ -146,13 +149,14 @@ export default function ReportPage() {
           </section>
         ) : null}
 
+        {/* 잘한 점 / 개선할 점 */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
             <h3 className="flex items-center gap-2 text-[14px] font-bold text-navy">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E7F1EA] text-[12px] text-[#2E7D57]">
                 ✓
               </span>
-              잘한 점
+              가장 잘한 행동
             </h3>
             {summary.strengths.length ? (
               <ul className="mt-3 space-y-2.5">
@@ -173,7 +177,7 @@ export default function ReportPage() {
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-pale text-[12px] text-gold">
                 ↑
               </span>
-              개선할 점
+              개선이 필요한 행동
             </h3>
             {summary.improvements.length ? (
               <ul className="mt-3 space-y-2.5">
@@ -190,48 +194,24 @@ export default function ReportPage() {
           </section>
         </div>
 
-        <details className="group mt-10">
+        {/* 영역별 상세 */}
+        <details className="group mt-10" open>
           <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-hair bg-white px-5 py-4 text-[15px] font-bold text-navy [&::-webkit-details-marker]:hidden">
-            축별 상세 점검
+            영역별 상세 점검
             <span className="text-[12px] font-medium text-navy-muted">
               <span className="group-open:hidden">자세히 보기 ▾</span>
               <span className="hidden group-open:inline">접기 ▴</span>
             </span>
           </summary>
           <div className="mt-4 space-y-4">
-            {axes.map((axis, index) => (
-              <AxisCard key={axis.key} axis={axis} index={index} />
+            {domains.map((domain) => (
+              <DomainCard key={domain.key} domain={domain} />
             ))}
           </div>
         </details>
 
         <div className="mt-6 space-y-4">
           <WarningCard warnings={warnings} />
-
-          <section className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
-            <h3 className="text-[15px] font-bold text-navy">개선 대화문</h3>
-            <p className="mt-1 text-[12px] text-navy-muted">
-              같은 상황에서 다시 말한다면 이렇게 할 수 있습니다.
-            </p>
-            <ol className="mt-4 space-y-3">
-              {[
-                { label: "대화 시작", text: recommendedDialogue.opening },
-                ...axes.map((a) => ({ label: a.title, text: a.betterResponseExample })),
-                { label: "실행 합의 마무리", text: recommendedDialogue.closing },
-              ]
-                .filter((item) => item.text)
-                .map((item) => (
-                  <li key={item.label} className="rounded-xl border border-hair/70 bg-frost p-4">
-                    <p className="text-[11.5px] font-semibold tracking-wide text-gold">
-                      {item.label}
-                    </p>
-                    <p className="mt-1.5 break-anywhere text-[13px] leading-relaxed text-navy">
-                      “{item.text}”
-                    </p>
-                  </li>
-                ))}
-            </ol>
-          </section>
 
           <TranscriptView
             messages={session.messages}
@@ -260,9 +240,8 @@ export default function ReportPage() {
         </div>
 
         <p className="mt-8 border-t border-hair pt-5 text-[11.5px] leading-relaxed text-navy-muted">
-          이 점검표는 인사평가나 심리 진단이 아니라 대화에서 다루지 못한 영역을 찾기 위한 교육용
-          도구입니다. 모든 판정은 실제 대화에서 확인된 부서장 발언을 근거로 서버에서 다시
-          검증했습니다.
+          이 점검표는 인사평가나 심리 진단이 아니라 대화 연습을 돕기 위한 교육용 도구입니다. 점수는
+          대화에서 확인된 부서장 발언을 기준으로 규칙에 따라 산정됩니다.
         </p>
       </div>
 

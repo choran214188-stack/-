@@ -1,23 +1,24 @@
-export type Mark = "○" | "△" | "×";
-
 export type Evidence = { turn: number; quote: string };
 
-export type CriterionReview = {
+/** 개별 항목 채점 (1~5점) */
+export type CriterionScore = {
   id: string;
   name: string;
-  mark: Mark;
-  note: string;
+  desc: string;
+  score: number; // 1-5
+  reason: string;
+  advice: string; // 4점 미만일 때만 채워진다
   evidence: Evidence[];
-  missing: string;
 };
 
-export type AxisReview = {
+/** 평가 영역 (언어적 설득 / 정서적 각성, 각 15점) */
+export type DomainReview = {
   key: string;
   title: string;
   desc: string;
-  criteria: CriterionReview[];
-  counts: { ok: number; part: number; none: number };
-  betterResponseExample: string;
+  score: number; // 3-15
+  max: number; // 15
+  criteria: CriterionScore[];
 };
 
 export type WarningItem = {
@@ -28,25 +29,22 @@ export type WarningItem = {
 };
 
 export type ReviewResult = {
+  totalScore: number; // 6-30 (원점수)
+  maxScore: number; // 30
+  score100: number; // 100점 환산 점수
+  grade: string;
   summary: {
     oneLine: string;
     overall: string;
-    expectedImpact: string;
     strengths: string[];
     improvements: string[];
-    strongest: string;
-    weakest: string;
-    counts: { done: number; partial: number; missing: number };
+    strongest: string; // 가장 잘 다룬 영역
+    weakest: string; // 가장 비어 있는 영역
   };
-  axes: AxisReview[];
+  domains: DomainReview[];
   warnings: WarningItem[];
-  recommendedDialogue: { opening: string; closing: string };
   meta: {
-    mock: boolean;
     hintCount: number;
     userTurnCount: number;
-    removedEvidenceCount: number;
-    removedWarningCount: number;
-    axisSet: "A" | "B";
   };
 };
