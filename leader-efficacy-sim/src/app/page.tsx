@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   clearSession,
@@ -10,108 +11,26 @@ import {
 } from "@/lib/storage/session-storage";
 import { CUSTOM_PERSONA_ID, CUSTOM_SCENARIO_ID } from "@/lib/custom";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import { PERSONALITY_PRESETS, SITUATION_PRESETS } from "@/config/presets";
-
-const LEVELS = ["난이도 하", "난이도 중", "난이도 상", "난이도 최상"];
-
-const toLines = (v: string) =>
-  v
-    .split("\n")
-    .map((l) => l.replace(/^[-·•\s]+/, "").trim())
-    .filter(Boolean);
-
-/** 상황 설명 앞부분을 잘라 자동으로 제목을 만든다. */
-const deriveTitle = (situation: string) => {
-  const first = situation.split(/[.\n]/)[0]?.trim() ?? "";
-  const base = (first || situation.trim()).slice(0, 40).trim();
-  return base || "직접 입력한 상황";
-};
-
-const field =
-  "mt-2 w-full rounded-xl border border-hair bg-white/80 px-4 py-3 text-[14px] leading-relaxed text-navy outline-none transition placeholder:text-navy-muted/50 focus:border-gold focus:bg-white focus:ring-4 focus:ring-gold/10";
-
-const labelClass =
-  "flex items-baseline gap-2 text-[12.5px] font-semibold tracking-tight text-navy";
-
-const numeral = "font-serif-display text-[15px] font-medium leading-none text-gold";
-
-const selChip = (on: boolean) =>
-  `rounded-full border px-3 py-1.5 text-[12px] font-medium transition ${
-    on
-      ? "border-navy bg-navy text-white shadow-sm"
-      : "border-hair bg-white/70 text-navy-soft hover:border-gold hover:text-navy"
-  }`;
+import { CASES } from "@/config/cases";
 
 export default function StartPage() {
   const router = useRouter();
   const [hasSaved, setHasSaved] = useState(false);
   const [confirmNew, setConfirmNew] = useState(false);
-
-  const [name, setName] = useState("");
-  const [levelIdx, setLevelIdx] = useState(1);
-
-  const [personaIdx, setPersonaIdx] = useState(0);
-  const [personaCustomOn, setPersonaCustomOn] = useState(false);
-  const [personaCustom, setPersonaCustom] = useState("");
-
-  const [situationIdx, setSituationIdx] = useState(0);
-  const [situationCustomOn, setSituationCustomOn] = useState(false);
-  const [situationCustom, setSituationCustom] = useState("");
-
+  const [selected, setSelected] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // 새로 들어오면 입력값은 항상 초기 상태에서 시작한다(이전 정보 복원하지 않음).
+    // 새로 들어오면 선택은 초기화한다.
     const saved = loadSession();
     setHasSaved(Boolean(saved && saved.messages.length > 0));
   }, []);
 
   const start = () => {
-    if (!name.trim()) return setError("팀장 이름을 입력해주세요.");
-
-    const personalityLines = personaCustomOn
-      ? toLines(personaCustom)
-      : PERSONALITY_PRESETS[personaIdx].lines;
-    if (personalityLines.length === 0)
-      return setError("성격을 선택하거나 직접 입력해주세요.");
-
-    const situationText = (
-      situationCustomOn ? situationCustom : SITUATION_PRESETS[situationIdx].text
-    ).trim();
-    if (situationText.length < 20)
-      return setError("상황을 조금 더 구체적으로 적어주세요. (20자 이상)");
-
-    const situationTitle = situationCustomOn
-      ? deriveTitle(situationText)
-      : SITUATION_PRESETS[situationIdx].label;
-
+    if (selected === null) return setError("대화할 팀장을 선택해주세요.");
     setError(null);
-
-    saveCustom({
-      persona: {
-        name: name.trim(),
-        levelLabel: LEVELS[levelIdx],
-        level: levelIdx + 1,
-        subtitle: personaCustomOn ? "" : PERSONALITY_PRESETS[personaIdx].label,
-        tagline: personalityLines[0] ?? "",
-        greeting: "",
-        personality: personalityLines,
-        resistancePatterns: [],
-      },
-      scenario: {
-        title: situationTitle,
-        summary: "",
-        situation: situationText,
-        challenge: "",
-        successCondition: "",
-        opening: [],
-        managerGoal: [],
-        hints: [],
-        axis: "A",
-        recommendedUserTurns: 6,
-        maxUserTurns: 12,
-      },
-    });
+    const c = CASES[selected];
+    saveCustom({ persona: c.persona, scenario: c.scenario });
     saveSelection({ personaId: CUSTOM_PERSONA_ID, scenarioId: CUSTOM_SCENARIO_ID });
     clearSession();
     router.push("/simulation");
@@ -119,7 +38,6 @@ export default function StartPage() {
 
   return (
     <main className="relative min-h-[100dvh] overflow-hidden bg-[radial-gradient(125%_90%_at_50%_-8%,#FFFFFF_0%,#F5F7FB_44%,#E8ECF3_100%)] px-5 py-14 sm:px-8 sm:py-20">
-      {/* 상단 네이비 광택 + 골드 후광 */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[46rem] -translate-x-1/2 rounded-full bg-navy/[0.06] blur-3xl"
@@ -129,8 +47,7 @@ export default function StartPage() {
         className="pointer-events-none absolute -top-20 left-1/2 h-52 w-[30rem] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl"
       />
 
-      <div className="relative mx-auto w-full max-w-[600px]">
-        {/* 헤더 */}
+      <div className="relative mx-auto w-full max-w-[720px]">
         <header className="animate-rise text-center" style={{ animationDelay: "40ms" }}>
           <div className="mx-auto flex items-center justify-center gap-3">
             <span className="h-px w-8 bg-gradient-to-r from-transparent to-gold/60" />
@@ -144,204 +61,102 @@ export default function StartPage() {
             팀장 임파워먼트 대화 시뮬레이션
           </h1>
 
-          <p className="mx-auto mt-5 max-w-[420px] break-keep text-[13.5px] leading-relaxed text-navy-soft">
-            팀장의 이름과 성격, 지금 처한 상황을 고르면 그 설정에 맞춰 AI 팀장과 실제처럼 대화합니다.
-            대화가 끝나면 임파워먼트 네 가지 축을 얼마나 다뤘는지 점검해 드립니다.
+          <p className="mx-auto mt-5 max-w-[460px] break-keep text-[13.5px] leading-relaxed text-navy-soft">
+            무력감을 느끼는 두 팀장 중 한 명을 골라, 부서장이 되어 대화로 풀어보세요. 대화가 끝나면
+            임파워먼트 네 가지 축을 얼마나 다뤘는지 점검해 드립니다.
           </p>
         </header>
 
-        {/* 입력 카드 */}
-        <section
-          className="animate-rise mt-11 overflow-hidden rounded-[26px] border border-hair bg-white/80 shadow-[0_30px_80px_-42px_rgba(22,35,60,0.5)] backdrop-blur-sm"
+        <div
+          className="animate-rise mt-10 grid gap-4 sm:grid-cols-2"
           style={{ animationDelay: "140ms" }}
         >
-          <div className="h-[3px] w-full bg-gradient-to-r from-gold-soft via-gold to-gold-soft" />
-
-          <div className="space-y-7 p-6 sm:p-8">
-            <div>
-              <label className={labelClass} htmlFor="c-name">
-                <span className={numeral}>01</span>
-                이름
-              </label>
-              <input
-                id="c-name"
-                className={field}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="예) 김도현"
-              />
-            </div>
-
-            <div>
-              <span className={labelClass}>
-                <span className={numeral}>02</span>
-                난이도
-                <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  팀장이 설득되는 정도
-                </span>
-              </span>
-              <div className="mt-2 grid grid-cols-4 gap-1.5 rounded-xl border border-hair bg-white/60 p-1">
-                {["하", "중", "상", "최상"].map((lv, i) => (
-                  <button
-                    key={lv}
-                    type="button"
-                    onClick={() => setLevelIdx(i)}
-                    className={`rounded-lg py-2 text-[13px] font-semibold transition ${
-                      levelIdx === i
-                        ? "bg-navy text-white shadow-sm"
-                        : "text-navy-muted hover:bg-white"
-                    }`}
-                  >
-                    {lv}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <span className={labelClass}>
-                <span className={numeral}>03</span>
-                성격
-                <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  유형을 고르거나 직접 입력
-                </span>
-              </span>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {PERSONALITY_PRESETS.map((p, i) => (
-                  <button
-                    key={p.label}
-                    type="button"
-                    onClick={() => {
-                      setPersonaCustomOn(false);
-                      setPersonaIdx(i);
-                    }}
-                    className={selChip(!personaCustomOn && personaIdx === i)}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!personaCustomOn) setPersonaCustom("");
-                    setPersonaCustomOn(true);
-                  }}
-                  className={selChip(personaCustomOn)}
-                >
-                  직접 입력
-                </button>
-              </div>
-              {personaCustomOn ? (
-                <textarea
-                  rows={4}
-                  className={field}
-                  value={personaCustom}
-                  onChange={(e) => setPersonaCustom(e.target.value)}
-                  placeholder={"한 줄에 하나씩 (말투·가치관·불안 요소 등)\n예) 책임감이 강하고 결과로 자신을 판단한다"}
-                />
-              ) : (
-                <ul className="mt-2 space-y-1.5 rounded-xl border border-hair bg-frost px-4 py-3 text-[13px] leading-relaxed text-navy-soft">
-                  {PERSONALITY_PRESETS[personaIdx].lines.map((l) => (
-                    <li key={l} className="flex gap-2">
-                      <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-gold" />
-                      <span>{l}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div>
-              <span className={labelClass}>
-                <span className={numeral}>04</span>
-                상황
-                <span className="text-[11.5px] font-normal text-navy-muted/70">
-                  상황을 고르거나 직접 입력
-                </span>
-              </span>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {SITUATION_PRESETS.map((p, i) => (
-                  <button
-                    key={p.label}
-                    type="button"
-                    onClick={() => {
-                      setSituationCustomOn(false);
-                      setSituationIdx(i);
-                    }}
-                    className={selChip(!situationCustomOn && situationIdx === i)}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!situationCustomOn) setSituationCustom("");
-                    setSituationCustomOn(true);
-                  }}
-                  className={selChip(situationCustomOn)}
-                >
-                  직접 입력
-                </button>
-              </div>
-              {situationCustomOn ? (
-                <textarea
-                  rows={5}
-                  className={field}
-                  value={situationCustom}
-                  onChange={(e) => setSituationCustom(e.target.value)}
-                  placeholder="언제 무슨 일이 있었고, 지금 무엇을 결정해야 하며, 팀장이 어떤 상태인지 적어주세요."
-                />
-              ) : (
-                <p className="mt-2 break-keep rounded-xl border border-hair bg-frost px-4 py-3 text-[13px] leading-relaxed text-navy-soft">
-                  {SITUATION_PRESETS[situationIdx].text}
-                </p>
-              )}
-            </div>
-
-            {error ? (
-              <p className="rounded-xl border border-[#E1CBCB] bg-[#FBF1F1] px-4 py-3 text-[12.5px] text-[#84343A]">
-                {error}
-              </p>
-            ) : null}
-
-            <div className="flex flex-col gap-3 pt-1 sm:flex-row">
+          {CASES.map((c, i) => {
+            const on = selected === i;
+            return (
               <button
+                key={c.id}
                 type="button"
-                onClick={hasSaved ? () => setConfirmNew(true) : start}
-                className="group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy px-7 py-4 text-[14px] font-semibold tracking-tight text-white shadow-[0_16px_34px_-16px_rgba(22,35,60,0.75)] transition hover:bg-navy-soft"
+                onClick={() => setSelected(i)}
+                aria-pressed={on}
+                className={`group relative overflow-hidden rounded-[22px] border bg-white p-5 text-left transition sm:p-6 ${
+                  on
+                    ? "border-navy shadow-[0_24px_60px_-34px_rgba(22,35,60,0.6)] ring-2 ring-navy/15"
+                    : "border-hair hover:border-gold/60 hover:shadow-[0_20px_50px_-36px_rgba(22,35,60,0.5)]"
+                }`}
               >
-                대화 시작하기
-                <span className="text-gold-soft transition-transform duration-200 group-hover:translate-x-1">
-                  →
-                </span>
+                {on ? (
+                  <span className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-navy text-[13px] text-white">
+                    ✓
+                  </span>
+                ) : null}
+
+                <div className="flex items-center gap-4">
+                  <Image
+                    src={c.persona.profileImage}
+                    alt={c.persona.name}
+                    width={72}
+                    height={88}
+                    className="h-[88px] w-[72px] shrink-0 rounded-xl border border-hair object-cover"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-[17px] font-bold text-navy">{c.persona.name}</p>
+                    <p className="mt-0.5 text-[12px] text-navy-muted">{c.persona.subtitle}</p>
+                    <span className="mt-2 inline-block rounded-full bg-gold-pale px-2.5 py-1 text-[11px] font-semibold text-[#8A6D2A]">
+                      {c.factor}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="mt-4 break-keep border-t border-hair pt-3.5 text-[13px] leading-relaxed text-navy-soft">
+                  {c.headline}
+                </p>
               </button>
-              {hasSaved ? (
-                <button
-                  type="button"
-                  onClick={() => router.push("/simulation")}
-                  className="rounded-2xl border border-navy/15 bg-white/60 px-7 py-4 text-[14px] font-semibold text-navy transition hover:border-gold/50 hover:bg-white"
-                >
-                  이어서 진행
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </section>
+            );
+          })}
+        </div>
+
+        {error ? (
+          <p className="mt-4 rounded-xl border border-[#E1CBCB] bg-[#FBF1F1] px-4 py-3 text-center text-[12.5px] text-[#84343A]">
+            {error}
+          </p>
+        ) : null}
+
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={hasSaved ? () => setConfirmNew(true) : start}
+            className="group inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-navy px-7 py-4 text-[14px] font-semibold tracking-tight text-white shadow-[0_16px_34px_-16px_rgba(22,35,60,0.75)] transition hover:bg-navy-soft"
+          >
+            대화 시작하기
+            <span className="text-gold-soft transition-transform duration-200 group-hover:translate-x-1">
+              →
+            </span>
+          </button>
+          {hasSaved ? (
+            <button
+              type="button"
+              onClick={() => router.push("/simulation")}
+              className="rounded-2xl border border-navy/15 bg-white/60 px-7 py-4 text-[14px] font-semibold text-navy transition hover:border-gold/50 hover:bg-white"
+            >
+              이어서 진행
+            </button>
+          ) : null}
+        </div>
 
         <p
-          className="animate-rise mx-auto mt-8 max-w-[440px] text-center text-[11.5px] leading-relaxed text-navy-muted"
+          className="animate-rise mx-auto mt-8 max-w-[460px] text-center text-[11.5px] leading-relaxed text-navy-muted"
           style={{ animationDelay: "240ms" }}
         >
-          입력한 내용은 이 브라우저에만 저장되며 서버에 보관되지 않습니다. 실제 구성원의 이름이나
-          개인 정보는 넣지 마십시오. 인사평가나 심리 진단이 아닌 리더십 교육용 대화 점검 도구입니다.
+          대화 내용은 이 브라우저에만 저장되며 서버에 보관되지 않습니다. 인사평가나 심리 진단이 아닌
+          리더십 교육용 대화 점검 도구입니다.
         </p>
       </div>
 
       <ConfirmModal
         open={confirmNew}
         title="새로 시작할까요?"
-        description="저장된 대화가 삭제되고 지금 입력한 설정으로 처음부터 다시 시작합니다."
+        description="저장된 대화가 삭제되고 지금 선택한 팀장으로 처음부터 다시 시작합니다."
         cancelLabel="취소"
         confirmLabel="새로 시작"
         tone="danger"
