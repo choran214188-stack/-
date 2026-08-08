@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getScenario } from "@/config/scenarios";
-import { buildMockReview, normalizeReview } from "@/lib/evaluation/review";
-import { customPersonaSchema, customScenarioSchema, toScenario } from "@/lib/custom";
+import { buildReview } from "@/lib/evaluation/score";
+import { customPersonaSchema, customScenarioSchema } from "@/lib/custom";
 import type { ChatMessage } from "@/types/chat";
 
 export const runtime = "nodejs";
@@ -28,8 +27,8 @@ const bodySchema = z.object({
 
 /**
  * 평가는 규칙 기반(키워드/구조)으로 수행한다. LLM 을 사용하지 않는다.
- * - 서버가 부서장 발언을 축·기준별로 확인하고 근거 인용을 재검증한다.
- * - 어떤 사례(고정 팀장/직접 입력)가 와도 동일한 축으로 채점한다.
+ * 6개 항목(언어적 설득 3 · 정서적 각성 3), 각 1~5점, 총 30점.
+ * 상황·페르소나에 상관없이 동일한 범용 루브릭으로 채점한다.
  */
 export async function POST(request: Request) {
   let parsedBody: unknown;
@@ -44,17 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 });
   }
 
-  const { messages, hintCount, scenarioId, customScenario } = parsed.data;
-  const scenario = customScenario ? toScenario(customScenario) : getScenario(scenarioId);
-  const chatMessages = messages as ChatMessage[];
-
-  const raw = buildMockReview(chatMessages, scenario);
-  const evaluation = normalizeReview({
-    raw,
-    messages: chatMessages,
-    scenario,
-    hintCount,
-    mock: true,
-  });
+  const { messages, hintCount } = parsed.data;
+  const evaluation = buildReview({ messages: messages as ChatMessage[], hintCount });
   return NextResponse.json({ evaluation });
 }
