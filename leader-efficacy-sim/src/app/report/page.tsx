@@ -70,8 +70,8 @@ export default function ReportPage() {
     );
   }
 
-  const { summary, domains, warnings, meta, totalScore, maxScore, grade } = review;
-  const pct = Math.round((totalScore / maxScore) * 100);
+  const { summary, domains, warnings, meta, score100, grade } = review;
+  const pct = score100;
 
   return (
     <main className="relative min-h-[100dvh] bg-[radial-gradient(120%_70%_at_50%_-6%,#FFFFFF_0%,#F5F7FB_46%,#E9EDF4_100%)] px-5 py-12 sm:px-8 sm:py-16">
@@ -103,8 +103,8 @@ export default function ReportPage() {
                 {grade}
               </span>
               <p className="mt-3 font-serif-display text-[52px] font-medium leading-none text-navy">
-                {totalScore}
-                <span className="text-[20px] font-normal text-navy-muted"> / {maxScore}</span>
+                {score100}
+                <span className="text-[20px] font-normal text-navy-muted"> / 100</span>
               </p>
               <div className="mt-4 h-2 w-full max-w-[320px] overflow-hidden rounded-full bg-[#EDEFF4]">
                 <div

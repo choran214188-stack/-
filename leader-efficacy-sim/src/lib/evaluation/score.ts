@@ -77,6 +77,7 @@ export function buildReview(params: { messages: ChatMessage[]; hintCount: number
 
   const totalScore = domains.reduce((n, d) => n + d.score, 0);
   const maxScore = domains.reduce((n, d) => n + d.max, 0);
+  const score100 = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
 
   const warnings: WarningItem[] = WARNING_RULES.flatMap((rule) => {
     const hit = turns.find((t) => rule.words.some((w) => t.content.includes(w)));
@@ -110,20 +111,20 @@ export function buildReview(params: { messages: ChatMessage[]; hintCount: number
   }
 
   const grade =
-    totalScore >= 26
+    score100 >= 85
       ? "매우 우수"
-      : totalScore >= 21
+      : score100 >= 70
         ? "우수"
-        : totalScore >= 16
+        : score100 >= 55
           ? "보통"
-          : totalScore >= 11
+          : score100 >= 40
             ? "보완 필요"
             : "재시도 권장";
 
   const oneLine =
-    totalScore >= 21
+    score100 >= 70
       ? "핵심을 잘 짚은 대화였습니다."
-      : totalScore >= 16
+      : score100 >= 55
         ? "기본은 다뤘고, 몇 가지만 보완하면 좋겠습니다."
         : "임파워먼트 요소를 조금 더 의식적으로 다뤄보면 좋겠습니다.";
 
@@ -134,6 +135,7 @@ export function buildReview(params: { messages: ChatMessage[]; hintCount: number
   return {
     totalScore,
     maxScore,
+    score100,
     grade,
     summary: { oneLine, overall, strengths, improvements, strongest, weakest },
     domains,

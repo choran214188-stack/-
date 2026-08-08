@@ -29,8 +29,9 @@ export type WarningItem = {
 };
 
 export type ReviewResult = {
-  totalScore: number; // 6-30
+  totalScore: number; // 6-30 (원점수)
   maxScore: number; // 30
+  score100: number; // 100점 환산 점수
   grade: string;
   summary: {
     oneLine: string;

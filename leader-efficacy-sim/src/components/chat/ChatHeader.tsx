@@ -11,19 +11,11 @@ type Props = {
   onMenuSelect: (action: ChatMenuAction) => void;
   onEnd: () => void;
   userTurnCount: number;
-  maxUserTurns: number;
 };
 
-export function ChatHeader({
-  persona,
-  onBack,
-  onMenuSelect,
-  onEnd,
-  userTurnCount,
-  maxUserTurns,
-}: Props) {
+export function ChatHeader({ persona, onBack, onMenuSelect, onEnd, userTurnCount }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const turnLabel = `대화 ${userTurnCount} / ${maxUserTurns}`;
+  const turnLabel = `대화 ${userTurnCount}회`;
 
   return (
     <header className="relative z-20 flex h-[56px] shrink-0 items-center gap-1 border-b border-[#ECECEC] bg-white px-2 sm:h-[60px]">

@@ -38,6 +38,9 @@ type SheetState = { title: string; body: React.ReactNode } | null;
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+/** 대화 종료(점검)를 위한 최소 응답 횟수. 상한은 없다. */
+const MIN_USER_TURNS = 5;
+
 export default function SimulationPage() {
   const router = useRouter();
   const [personaId, setPersonaId] = useState(DEFAULT_PERSONA_ID);
@@ -85,8 +88,8 @@ export default function SimulationPage() {
   const initRef = useRef(false);
   const pendingRef = useRef<SimulationSession | null>(null);
 
-  const maxUserTurns = scenario.maxUserTurns;
-  const reachedMax = userTurnCount >= maxUserTurns;
+  const canEnd = userTurnCount >= MIN_USER_TURNS;
+  const remainingToEnd = Math.max(0, MIN_USER_TURNS - userTurnCount);
 
   const persist = useCallback(
     (patch: Partial<SimulationSession>) => {
@@ -241,7 +244,7 @@ export default function SimulationPage() {
 
   const handleSend = useCallback(
     (text: string) => {
-      if (sending || typing || reachedMax) return;
+      if (sending || typing) return;
       const nextTurn = userTurnCount + 1;
       const userMessage: ChatMessage = {
         id: createId("msg"),
@@ -255,8 +258,25 @@ export default function SimulationPage() {
       setUserTurnCount(nextTurn);
       void sendMessage(text, history, nextTurn);
     },
-    [sending, typing, reachedMax, userTurnCount, messages, sendMessage],
+    [sending, typing, userTurnCount, messages, sendMessage],
   );
+
+  // 대화 종료 요청: 최소 응답 횟수를 채우기 전에는 안내만 표시한다.
+  const requestEnd = useCallback(() => {
+    if (!canEnd) {
+      setSheet({
+        title: "조금만 더 대화해주세요",
+        body: (
+          <p>
+            대화 점검은 부서장 응답이 최소 {MIN_USER_TURNS}회 이상일 때 진행할 수 있습니다. 지금은{" "}
+            {userTurnCount}회이며, {remainingToEnd}회만 더 이어가면 종료할 수 있습니다.
+          </p>
+        ),
+      });
+      return;
+    }
+    setEndOpen(true);
+  }, [canEnd, userTurnCount, remainingToEnd]);
 
   const runEvaluation = useCallback(async () => {
     setEndOpen(false);
@@ -326,19 +346,18 @@ export default function SimulationPage() {
             ))}
           </ul>
           <p className="mt-3 text-[12px] text-navy-muted">
-            현재 진행: 부서장 응답 {userTurnCount} / {maxUserTurns}회 (권장{" "}
-            {scenario.recommendedUserTurns}회 이상)
+            현재 진행: 부서장 응답 {userTurnCount}회 (최소 {MIN_USER_TURNS}회 이상 · 상한 없음)
           </p>
         </>
       ),
     });
-  }, [scenario, userTurnCount, maxUserTurns]);
+  }, [scenario, userTurnCount]);
 
   const handleMenu = useCallback(
     (action: ChatMenuAction) => {
       if (action === "scenario") return showScenario();
       if (action === "reset") return setResetOpen(true);
-      if (action === "end") return setEndOpen(true);
+      if (action === "end") return requestEnd();
       setSheet({
         title: "도움말",
         body: (
@@ -351,7 +370,7 @@ export default function SimulationPage() {
               <li>Enter 전송, Shift+Enter 줄바꿈</li>
               <li>왼쪽 + 버튼에서 시나리오 정보와 힌트를 볼 수 있습니다</li>
               <li>대화 종료는 오른쪽 위 메뉴에서 선택합니다</li>
-              <li>권장 {scenario.recommendedUserTurns}회 이상, 최대 {maxUserTurns}회까지 응답할 수 있습니다</li>
+              <li>최소 {MIN_USER_TURNS}회 이상 대화하면 종료하고 점검받을 수 있습니다 (횟수 제한 없음)</li>
             </ul>
             <p className="mt-3 text-[12px] text-navy-muted">
               점수는 진단이 아니라 대화 수행 점수입니다.
@@ -360,13 +379,10 @@ export default function SimulationPage() {
         ),
       });
     },
-    [showScenario, scenario.recommendedUserTurns, maxUserTurns],
+    [showScenario, requestEnd],
   );
 
-  const noticeVisible = useMemo(
-    () => userTurnCount >= scenario.recommendedUserTurns && !evaluating,
-    [userTurnCount, scenario.recommendedUserTurns, evaluating],
-  );
+  const noticeVisible = useMemo(() => canEnd && !evaluating, [canEnd, evaluating]);
 
   return (
     <PhoneFrame>
@@ -374,9 +390,8 @@ export default function SimulationPage() {
         persona={persona}
         onBack={() => router.push("/")}
         onMenuSelect={handleMenu}
-        onEnd={() => setEndOpen(true)}
+        onEnd={requestEnd}
         userTurnCount={userTurnCount}
-        maxUserTurns={maxUserTurns}
       />
 
       <ChatMessageList
@@ -406,9 +421,7 @@ export default function SimulationPage() {
       {noticeVisible ? (
         <div className="flex items-center justify-between gap-2 border-t border-[#EFEFEF] bg-[#FFFBEC] px-3 py-2">
           <p className="text-[11.5px] leading-snug text-[#5A4A16]">
-            {reachedMax
-              ? `최대 응답 횟수(${maxUserTurns}회)에 도달했습니다. 점검을 진행해주세요.`
-              : "현재까지의 대화로 점검을 진행할 수 있습니다."}
+            충분히 대화했습니다. 원할 때 언제든 종료하고 점검받을 수 있어요. (계속 이어가도 됩니다)
           </p>
           <button
             type="button"
@@ -421,11 +434,11 @@ export default function SimulationPage() {
       ) : null}
 
       <ChatComposer
-        disabled={sending || typing || evaluating || reachedMax}
+        disabled={sending || typing || evaluating}
         onSend={handleSend}
         onShowScenario={showScenario}
         onShowHint={showHint}
-        onEnd={() => setEndOpen(true)}
+        onEnd={requestEnd}
       />
 
       <InfoSheet
