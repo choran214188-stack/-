@@ -19,3 +19,9 @@ yarn-error.log*
 
 # local env files
 .env*.local
+
+# build artifacts (was committed and broke BuildKit overlay)
+*.tsbuildinfo
+next-env.d.ts
+/build.log
+/server.log

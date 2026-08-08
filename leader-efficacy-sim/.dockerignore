@@ -4,3 +4,5 @@ node_modules
 npm-debug.log
 build.log
 server.log
+tsconfig.tsbuildinfo
+next-env.d.ts
