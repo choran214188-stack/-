@@ -154,15 +154,13 @@ export default function StartPage() {
                 ) : null}
 
                 <div className="flex items-center gap-4">
-                  <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-xl bg-navy">
-                    <Image
-                      src={c.persona.profileImage}
-                      alt={c.persona.name}
-                      fill
-                      sizes="88px"
-                      className="object-cover object-top"
-                    />
-                  </div>
+                  <Image
+                    src={c.persona.profileImage}
+                    alt={c.persona.name}
+                    width={72}
+                    height={88}
+                    className="h-[88px] w-[72px] shrink-0 rounded-xl border border-hair object-cover"
+                  />
                   <div className="min-w-0">
                     <p className="text-[17px] font-bold text-navy">{c.persona.name}</p>
                     <p className="mt-0.5 text-[12px] text-navy-muted">{c.persona.subtitle}</p>
