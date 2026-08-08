@@ -12,6 +12,7 @@ export const customPersonaSchema = z.object({
   subtitle: line(60).default(""),
   tagline: line(200).default(""),
   greeting: line(120).default(""),
+  profileImage: line(300).default(""),
   personality: z.array(line(120)).max(8).default([]),
   resistancePatterns: z.array(line(120)).max(8).default([]),
 });
@@ -41,6 +42,7 @@ export function toPersona(input: CustomPersonaInput): Persona {
   return {
     id: CUSTOM_PERSONA_ID,
     name: input.name,
+    profileImage: input.profileImage || undefined,
     position: "팀장",
     subtitle: input.subtitle || `${input.levelLabel.replace("난이도 ", "")} 유형`,
     tenure: "",
